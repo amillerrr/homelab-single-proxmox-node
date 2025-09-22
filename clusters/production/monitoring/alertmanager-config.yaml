@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alertmanager-config
+  namespace: monitoring
+stringData:
+  alertmanager.yaml: |
+    global:
+      resolve_timeout: 5m
+      slack_api_url: 'YOUR_SLACK_WEBHOOK_URL'
+      
+    route:
+      group_by: ['alertname', 'cluster', 'service']
+      group_wait: 10s
+      group_interval: 5m
+      repeat_interval: 4h
+      receiver: 'default'
+      routes:
+      - match:
+          severity: critical
+        receiver: 'critical'
+        continue: true
+      - match:
+          severity: warning
+        receiver: 'warning'
+        continue: true
+      - match:
+          component: infrastructure
+        receiver: 'infrastructure-team'
+      - match:
+          component: application
+        receiver: 'dev-team'
+        
+    receivers:
+    - name: 'default'
+      slack_configs:
+      - channel: '#alerts'
+        title: 'Alert: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        
+    - name: 'critical'
+      slack_configs:
+      - channel: '#critical-alerts'
+        title: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+      pagerduty_configs:
+      - service_key: 'YOUR_PAGERDUTY_SERVICE_KEY'
+        
+    - name: 'warning'
+      slack_configs:
+      - channel: '#alerts'
+        title: '⚠️  Warning: {{ .GroupLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
+        
+    - name: 'infrastructure-team'
+      slack_configs:
+      - channel: '#infra-alerts'
+        webhook_url: 'INFRA_TEAM_SLACK_WEBHOOK'
+        
+    - name: 'dev-team'
+      slack_configs:
+      - channel: '#dev-alerts'
+        webhook_url: 'DEV_TEAM_SLACK_WEBHOOK'
+        
+    inhibit_rules:
+    - source_match:
+        severity: 'critical'
+      target_match:
+        severity: 'warning'
+      equal: ['alertname', 'cluster', 'service']
+
+---

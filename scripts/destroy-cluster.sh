@@ -48,7 +48,9 @@ fi
 
 # Clean up generated configs
 rm -f "${TALOS_DIR}"/controlplane-*.yaml
+rm -f "${TALOS_DIR}"/controlplane.yaml
 rm -f "${TALOS_DIR}"/worker-*.yaml
+rm -f "${TALOS_DIR}"/worker.yaml
 rm -f "${TALOS_DIR}"/talosconfig
 
 echo -e "\n${RED}Cluster destroyed successfully.${NC}"

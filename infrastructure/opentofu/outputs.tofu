@@ -1,72 +1,58 @@
-output "control_plane_ips" {
-  description = "IP addresses of control plane nodes"
-  value       = var.control_plane_ips
+resource "local_file" "talos_machine_secrets" {
+  content = yamlencode({
+    cluster    = module.talos_cluster.machine_secrets.cluster
+    secrets    = module.talos_cluster.machine_secrets.secrets
+    trustdinfo = module.talos_cluster.machine_secrets.trustdinfo
+    certs = {
+      etcd = {
+        crt = module.talos_cluster.machine_secrets.certs.etcd.cert
+        key = module.talos_cluster.machine_secrets.certs.etcd.key
+      }
+      k8s = {
+        crt = module.talos_cluster.machine_secrets.certs.k8s.cert
+        key = module.talos_cluster.machine_secrets.certs.k8s.key
+      }
+      k8saggregator = {
+        crt = module.talos_cluster.machine_secrets.certs.k8s_aggregator.cert
+        key = module.talos_cluster.machine_secrets.certs.k8s_aggregator.key
+      }
+      k8sserviceaccount = {
+        key = module.talos_cluster.machine_secrets.certs.k8s_serviceaccount.key
+      }
+      os = {
+        crt = module.talos_cluster.machine_secrets.certs.os.cert
+        key = module.talos_cluster.machine_secrets.certs.os.key
+      }
+    }
+  })
+  filename = "output/talos-machine-secrets.yaml"
 }
 
-output "worker_ips" {
-  description = "IP addresses of worker nodes"
-  value       = var.worker_ips
+resource "local_file" "talos_machine_configs" {
+  for_each        = module.talos_cluster.machine_config
+  content         = each.value.machine_configuration
+  filename        = "output/talos-machine-config-${each.key}.yaml"
+  file_permission = "0600"
 }
 
-output "cluster_vip" {
-  description = "Virtual IP for Kubernetes API"
-  value       = var.cluster_vip
+resource "local_file" "talos_config" {
+  content         = module.talos_cluster.client_configuration.talos_config
+  filename        = "output/talos-config.yaml"
+  file_permission = "0600"
 }
 
-output "cluster_endpoint" {
-  description = "Kubernetes API endpoint"
-  value       = "https://${var.cluster_vip}:6443"
+resource "local_file" "kube_config" {
+  content         = module.talos_cluster.kube_config.kubeconfig_raw
+  filename        = "output/kube-config.yaml"
+  file_permission = "0600"
 }
 
-output "talos_config_path" {
-  description = "Path to Talos configuration file"
-  value       = "../talos/talosconfig"
+output "kube_config" {
+  value     = module.talos_cluster.kube_config.kubeconfig_raw
+  sensitive = true
 }
 
-output "vm_ids" {
-  description = "VM IDs created"
-  value = {
-    control_plane = [for vm in proxmox_vm_qemu.control_plane : vm.vmid]
-    workers       = [for vm in proxmox_vm_qemu.worker : vm.vmid]
-  }
-}
-
-output "cluster_info" {
-  description = "Cluster information summary"
-  value = {
-    name              = var.cluster_name
-    control_plane_count = var.control_plane_count
-    worker_count      = var.worker_count
-    total_nodes       = var.control_plane_count + var.worker_count
-    talos_version     = var.talos_version
-  }
-}
-
-output "next_steps" {
-  description = "Next steps after deployment"
-  value = <<-EOT
-    Cluster deployed with Cilium CNI! Next steps:
-    
-    1. Export Talos config:
-       export TALOSCONFIG=${abspath("../talos/talosconfig")}
-    
-    2. Check cluster health:
-       talosctl health --nodes ${join(",", var.control_plane_ips)}
-    
-    3. Verify Cilium CNI:
-       cilium status
-       kubectl get pods -n kube-system | grep cilium
-    
-    4. Get kubeconfig:
-       talosctl kubeconfig
-    
-    5. Check nodes:
-       kubectl get nodes
-    
-    6. Install GitOps (ArgoCD):
-       ./scripts/setup-argocd.sh
-    
-    7. Setup Sealed Secrets:
-       ./scripts/manage-sealed-secrets.sh install
-  EOT
+output "talos_config" {
+  value     = module.talos_cluster.client_configuration.talos_config
+  sensitive = true
 }

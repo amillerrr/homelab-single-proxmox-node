@@ -1,0 +1,16 @@
+terraform {
+  required_providers {
+    proxmox = {
+      source  = "bpg/proxmox"
+      version = "0.83.2"
+    }
+    talos = {
+      source = "siderolabs/talos"
+      version = "0.9.0"
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = ">=3.4.5"
+    }
+  }
+}

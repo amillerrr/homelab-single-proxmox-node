@@ -1,0 +1,37 @@
+name: 'ArgoCD Sync Check'
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'clusters/**'
+
+jobs:
+  validate:
+    name: 'Validate Manifests'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0'
+
+    - name: Validate Kubernetes manifests
+      run: |
+        find clusters/ -name '*.yaml' -o -name '*.yml' | while read file; do
+          echo "Validating $file"
+          kubectl apply --dry-run=client -f "$file"
+        done
+
+    - name: Validate with kubeconform
+      run: |
+        wget https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz
+        tar xf kubeconform-linux-amd64.tar.gz
+        ./kubeconform -summary -output json clusters/
+
+

@@ -1,0 +1,37 @@
+machine:
+  kubelet:
+    image: ghcr.io/siderolabs/kubelet:${kubernetes_version}
+    ${indent(4, kubelet)}
+  nodeLabels:
+    topology.kubernetes.io/region: ${cluster_name}
+    topology.kubernetes.io/zone: ${node_name}
+  network:
+    hostname: ${hostname}
+  sysctls:
+    net.core.bpf_jit_enable: "1"
+    net.ipv4.conf.all.rp_filter: "0"
+    net.ipv4.conf.default.rp_filter: "0"
+    net.ipv4.ip_forward: "1"
+    net.ipv6.conf.all.forwarding: "1"
+    net.ipv4.conf.all.accept_local: "1"
+    net.ipv4.conf.all.arp_announce: "2"
+    net.ipv4.conf.all.arp_ignore: "1"
+    net.ipv4.fib_multipath_use_neigh: "1"
+  kernel:
+    modules:
+      - name: br_netfilter
+      - name: overlay
+      - name: ip_tables
+      - name: iptable_nat
+      - name: iptable_filter
+      - name: iptable_mangle
+
+cluster:
+  apiServer:
+    image: registry.k8s.io/kube-apiserver:${kubernetes_version}
+  controllerManager:
+    image: registry.k8s.io/kube-controller-manager:${kubernetes_version}
+  proxy:
+    image: registry.k8s.io/kube-proxy:${kubernetes_version}
+  scheduler:
+    image: registry.k8s.io/kube-scheduler:${kubernetes_version}

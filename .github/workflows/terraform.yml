@@ -1,0 +1,56 @@
+name: 'Terraform Infrastructure'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infrastructure/terraform/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'infrastructure/terraform/**'
+
+env:
+  TF_VERSION: '1.6.0'
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./infrastructure/terraform
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup OpenTofu
+      uses: opentofu/setup-opentofu@v1
+      with:
+        tofu_version: ${{ env.TF_VERSION }}
+
+    - name: Tofu Init
+      run: tofu init
+      env:
+        TF_VAR_proxmox_api_token_id: ${{ secrets.PROXMOX_TOKEN_ID }}
+        TF_VAR_proxmox_api_token_secret: ${{ secrets.PROXMOX_TOKEN_SECRET }}
+
+    - name: Tofu Format Check
+      run: tofu fmt -check
+
+    - name: Tofu Plan
+      run: tofu plan
+      env:
+        TF_VAR_proxmox_api_token_id: ${{ secrets.PROXMOX_TOKEN_ID }}
+        TF_VAR_proxmox_api_token_secret: ${{ secrets.PROXMOX_TOKEN_SECRET }}
+
+    - name: Tofu Apply
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: tofu apply -auto-approve
+      env:
+        TF_VAR_proxmox_api_token_id: ${{ secrets.PROXMOX_TOKEN_ID }}
+        TF_VAR_proxmox_api_token_secret: ${{ secrets.PROXMOX_TOKEN_SECRET }}
