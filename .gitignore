@@ -24,6 +24,7 @@ infrastructure/talos/talosconfig
 
 crash.log
 *.log
+logs.txt
 .DS_Store
 Thumbs.db
 *.qcow2
