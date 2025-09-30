@@ -11,6 +11,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   description = each.value.machine_type == "controlplane" ? "Talos Control Plane" : "Talos Worker"
   tags        = each.value.machine_type == "controlplane" ? ["k8s", "control-plane"] : ["k8s", "worker"]
   on_boot     = true
+  started     = true
   vm_id       = each.value.vm_id
 
   machine       = "q35"
@@ -44,11 +45,15 @@ resource "proxmox_virtual_environment_vm" "this" {
     discard      = "on"
     ssd          = true
     file_format  = "raw"
-    size         = 100
-    file_id      = proxmox_virtual_environment_download_file.this["${each.value.host_node}_${each.value.update == true ? local.update_image_id : local.image_id}"].id
+    size         = 32
   }
 
-  boot_order = ["scsi0"]
+  cdrom {
+    file_id   = proxmox_virtual_environment_download_file.this["${each.value.host_node}_${each.value.update == true ? local.update_image_id : local.image_id}"].id
+    interface = "ide2"
+  }
+
+  boot_order = ["ide2", "scsi0"]
 
   operating_system {
     type = "l26" # Linux Kernel 2.6 - 6.X.

@@ -24,7 +24,7 @@ variable "talos_image" {
     update_version        = optional(string)
     update_schematic_path = optional(string)
     arch                  = optional(string, "amd64")
-    platform              = optional(string, "nocloud")
+    platform              = optional(string, "metal")
     proxmox_datastore     = optional(string, "local")
   })
 }

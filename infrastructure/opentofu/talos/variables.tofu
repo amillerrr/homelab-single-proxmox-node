@@ -22,7 +22,7 @@ variable "cluster" {
     talos_machine_config_version = optional(string)
     proxmox_cluster              = string
     kubernetes_version           = string
-    gateway_api_version          = optional(string, "")
+    gateway_api_version          = optional(string, "1.2.1")
     extra_manifests              = optional(list(string))
     kubelet                      = optional(string, "")
     api_server                   = optional(string, "")

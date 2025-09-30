@@ -9,34 +9,48 @@ spec:
     - type: IPAddress
       value: 10.0.70.150
   listeners:
-    - protocol: TLS
-      port: 443
-      name: tls-passthrough
+    - protocol: HTTP  
+      port: 80        
+      name: http-gateway
       hostname: "*.mill3r.la"
-      tls:
-        mode: Passthrough
       allowedRoutes:
         namespaces:
           from: All
-    - protocol: HTTPS
-      port: 443
-      name: https-gateway
-      hostname: "*.mill3r.la"
-      tls:
-        certificateRefs:
-          - kind: Secret
-            name: cert-homelab
-      allowedRoutes:
-        namespaces:
-          from: All
-    - protocol: HTTPS
-      port: 443
-      name: https-domain-gateway
+    - protocol: HTTP
+      port: 80
+      name: http-domain-gateway
       hostname: mill3r.la
-      tls:
-        certificateRefs:
-          - kind: Secret
-            name: cert-homelab
       allowedRoutes:
         namespaces:
           from: All
+    # - protocol: TLS
+    #   port: 443
+    #   name: tls-passthrough
+    #   hostname: "*.mill3r.la"
+    #   tls:
+    #     mode: Passthrough
+    #   allowedRoutes:
+    #     namespaces:
+    #       from: All
+    # - protocol: HTTPS
+    #   port: 443
+    #   name: https-gateway
+    #   hostname: "*.mill3r.la"
+    #   tls:
+    #     certificateRefs:
+    #       - kind: Secret
+    #         name: cert-homelab
+    #   allowedRoutes:
+    #     namespaces:
+    #       from: All
+    # - protocol: HTTPS
+    #   port: 443
+    #   name: https-domain-gateway
+    #   hostname: mill3r.la
+    #   tls:
+    #     certificateRefs:
+    #       - kind: Secret
+    #         name: cert-homelab
+    #   allowedRoutes:
+    #     namespaces:
+    #       from: All
