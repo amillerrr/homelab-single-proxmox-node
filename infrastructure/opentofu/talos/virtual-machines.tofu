@@ -10,7 +10,6 @@ resource "proxmox_virtual_environment_vm" "this" {
   name        = each.key
   description = each.value.machine_type == "controlplane" ? "Talos Control Plane" : "Talos Worker"
   tags        = each.value.machine_type == "controlplane" ? ["k8s", "control-plane"] : ["k8s", "worker"]
-  started = true
   on_boot     = true
   vm_id       = each.value.vm_id
 
@@ -58,31 +57,11 @@ resource "proxmox_virtual_environment_vm" "this" {
   initialization {
     datastore_id = each.value.datastore_id
 
-    # Optional DNS Block.  Update Nodes with a list value to use.
-    dynamic "dns" {
-      for_each = try(each.value.dns, null) != null ? { "enabled" = each.value.dns } : {}
-      content {
-        servers = each.value.dns
-      }
-    }
-
     ip_config {
       ipv4 {
         address = "${each.value.ip}/${var.cluster.subnet_mask}"
         gateway = var.cluster.gateway
       }
-    }
-  }
-
-  dynamic "hostpci" {
-    for_each = each.value.igpu ? [1] : []
-    content {
-      # Passthrough iGPU
-      device  = "hostpci0"
-      mapping = "iGPU"
-      pcie    = true
-      rombar  = true
-      xvga    = false
     }
   }
 }

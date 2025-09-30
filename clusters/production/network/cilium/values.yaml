@@ -79,17 +79,6 @@ gatewayAPI:
 #  enableAlpn: true
 #  enableAppProtocol: true
 
-envoy:
-  prometheus:
-    enabled: true
-    port: "9964"
-    serviceMonitor:
-      enabled: true
-  securityContext:
-    capabilities:
-      keepCapNetBindService: true
-      envoy: [ NET_ADMIN, PERFMON, BPF ]
-
 hubble:
   enabled: true
   metrics:
@@ -140,13 +129,5 @@ authentication:
           dataStorage:
             storageClass: cilium-spire-sc
 
-prometheus:
-  metricsService: true
-  enabled: true
-  port: 9962
-  serviceMonitor:
-    enabled: true
-    trustCRDsExist: true
-
 dashboards:
-  enabled: true
+  enabled: false

@@ -35,7 +35,7 @@ resource "terraform_data" "cilium_bootstrap_inline_manifests" {
           namespace = "kube-system"
         }
         data = {
-          "values.yaml" = file("${path.cwd}/${var.cluster.cilium.values_file_path}")
+          "values.yaml" = file("${path.root}/${var.cluster.cilium.values_file_path}")
         }
       })
     }

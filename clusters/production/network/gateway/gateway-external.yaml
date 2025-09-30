@@ -1,0 +1,33 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: external
+  namespace: gateway
+spec:
+  gatewayClassName: cilium
+  addresses:
+    - type: IPAddress
+      value: 10.0.70.151
+  listeners:
+    - protocol: HTTPS
+      port: 443
+      name: https-gateway
+      hostname: "*.mill3r.la"
+      tls:
+        certificateRefs:
+          - kind: Secret
+            name: cert-homelab
+      allowedRoutes:
+        namespaces:
+          from: All
+    - protocol: HTTPS
+      port: 443
+      name: https-domain-gateway
+      hostname: mill3r.la
+      tls:
+        certificateRefs:
+          - kind: Secret
+            name: cert-homelab
+      allowedRoutes:
+        namespaces:
+          from: All
