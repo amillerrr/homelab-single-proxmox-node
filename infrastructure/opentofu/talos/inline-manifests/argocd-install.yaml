@@ -1,0 +1,115 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argocd-bootstrap
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: argocd-bootstrap
+    namespace: argocd
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argocd-bootstrap
+  namespace: argocd
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: argocd-bootstrap
+  namespace: argocd
+spec:
+  backoffLimit: 10
+  template:
+    metadata:
+      labels:
+        app: argocd-bootstrap
+    spec:
+      restartPolicy: OnFailure
+      tolerations:
+        - operator: Exists
+        - effect: NoSchedule
+          operator: Exists
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/control-plane
+                    operator: Exists
+      serviceAccountName: argocd-bootstrap
+      hostNetwork: true
+      containers:
+        - name: argocd-bootstrap
+          image: alpine/k8s:1.29.2
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "Installing ArgoCD via Kustomize..."
+              
+              # Wait for API server
+              until kubectl get nodes; do
+                echo "Waiting for API server..."
+                sleep 5
+              done
+              
+              # Clone repo or use embedded manifests
+              # For now, apply from URL
+              kubectl apply -k https://github.com/amillerrr/homelab-single-proxmox-node//clusters/production/base/argocd?ref=main
+              
+              # Wait for ArgoCD to be ready
+              kubectl wait --for=condition=available --timeout=600s \
+                deployment/argocd-server -n argocd || true
+              
+              echo "ArgoCD installed successfully!"
+              
+              # Apply ApplicationSet
+              cat <<EOF | kubectl apply -f -
+              apiVersion: argoproj.io/v1alpha1
+              kind: ApplicationSet
+              metadata:
+                name: cluster-components
+                namespace: argocd
+              spec:
+                goTemplate: true
+                generators:
+                  - git:
+                      repoURL: https://github.com/amillerrr/homelab-single-proxmox-node.git
+                      revision: main
+                      directories:
+                        - path: clusters/production/base/*
+                        - path: clusters/production/overlays/production/*
+                template:
+                  metadata:
+                    name: '{{.path.basename}}'
+                    namespace: argocd
+                  spec:
+                    project: default
+                    source:
+                      repoURL: https://github.com/amillerrr/homelab-single-proxmox-node.git
+                      targetRevision: main
+                      path: '{{.path.path}}'
+                    destination:
+                      server: https://kubernetes.default.svc
+                    syncPolicy:
+                      automated:
+                        prune: true
+                        selfHeal: true
+              EOF
+              
+              echo "ApplicationSet deployed!"

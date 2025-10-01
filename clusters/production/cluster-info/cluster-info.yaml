@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-info
+  namespace: kube-public
+data:
+  cluster-name: "talos-homelab"
+  environment: "production"
+  
+  # ArgoCD Access
+  argocd-url: "kubectl get svc argocd-server -n argocd -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+  argocd-password: "kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d"
+  
+  # Sealed Secrets
+  sealed-secrets-cert: "kubeseal --fetch-cert"
+  
+  # Quick commands
+  get-all-apps: "kubectl get applications -n argocd"
+  sync-all: "kubectl get applications -n argocd -o name | xargs -I {} kubectl patch {} -n argocd --type merge -p '{\"operation\":{\"sync\":{}}}'"

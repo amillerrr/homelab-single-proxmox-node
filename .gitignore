@@ -1,36 +1,75 @@
-# Terraform
-.terraform
+# Terraform/OpenTofu
+.terraform/
 *.tfstate
 *.tfstate.*
 *.tfvars
+!*.tfvars.example
 **/*.tfplan
 *secret*.tfvars
 *secret*.tfvars.json
-!sealed-secrets.auto.tfvars
 *.lock.hcl
 
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
-
-output/
-*.out
-outputs.json
+# Explicitly ignore all sensitive variable files
+terraform.tfvars
+terraform.tfvars.json
+secrets.auto.tfvars
+secrets.auto.tfvars.json
 
 # Talos secrets
 infrastructure/talos/secrets/
 infrastructure/talos/talosconfig
+infrastructure/talos/*-secrets.yaml
+infrastructure/talos/controlplane.yaml
+infrastructure/talos/worker.yaml
 
-crash.log
-*.log
-logs.txt
-.DS_Store
-Thumbs.db
-*.qcow2
-*.raw
+# Output files with secrets
+output/
+*.out
+outputs.json
+
+# Kubernetes configs
+kubeconfig
+*.kubeconfig
+kube-config.yaml
+
+# Certificates and keys
 *.cert
 *.key
 *.pem
+!pub-*.pem
 *.crt
+!*.crt.example
+*.p12
+*.pfx
+
+# Sealed secrets backup keys (NEVER commit!)
+sealed-secrets-key.yaml
+sealed-secrets-master-key*.yaml
+.sealed-secrets-backup/
+
+# But allow the sealed secret manifests
+!clusters/**/sealed-secrets/
+!clusters/**/*-sealed.yaml
+
+# Logs
+crash.log
+*.log
+logs.txt
+
+# OS files
+.DS_Store
+Thumbs.db
 *.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+
+# Helm
+charts/*.tgz
+
+# Build artifacts
+*.qcow2
+*.raw

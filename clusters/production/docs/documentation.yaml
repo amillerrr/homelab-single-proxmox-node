@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-documentation
+  namespace: kube-public
+data:
+  README.md: |
+    # Kubernetes Homelab Cluster
+    
+    ## Quick Commands
+    
+    ### View Cluster Info
+    kubectl get configmap cluster-info -n kube-public -o yaml
+    ### View All Applications
+        kubectl get applications -n argocd
+        kubectl get applications -n argocd -o wide
+    ### Get ArgoCD Credentials
+        kubectl get configmap argocd-access-info -n argocd -o yaml
+    ### Seal a Secret
+        kubectl create secret generic my-secret \
+          --from-literal=password=supersecret \
+          --namespace=default \
+          --dry-run=client -o yaml | \
+          kubeseal -o yaml > my-sealed-secret.yaml
+    ### Force Application Sync
+        kubectl patch application sealed-secrets -n argocd \
+          --type merge \
+          -p '{"operation":{"sync":{"revision":"HEAD"}}}'
+    ### View Certificate Status
+        kubectl get certificates -A
+        kubectl describe certificate cert-homelab -n gateway
+    ### View Gateway Status
+        kubectl get gateways -A
+        kubectl describe gateway internal -n gateway
+    ### View Routes
+        kubectl get httproutes -A

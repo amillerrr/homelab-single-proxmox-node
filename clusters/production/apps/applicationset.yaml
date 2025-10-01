@@ -1,0 +1,83 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-components
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          - name: sealed-secrets
+            path: base/sealed-secrets
+            namespace: sealed-secrets
+            wave: "1"
+            prune: true
+          
+          - name: cert-manager
+            path: base/cert-manager
+            namespace: cert-manager
+            wave: "2"
+            prune: true
+          
+          - name: cert-manager-config
+            path: overlays/production/cert-manager
+            namespace: cert-manager
+            wave: "3"
+            prune: true
+          
+          - name: gateway
+            path: base/gateway
+            namespace: gateway
+            wave: "4"
+            prune: true
+          
+          - name: cilium-config
+            path: network/cilium
+            namespace: kube-system
+            wave: "5"
+            prune: false
+          
+          - name: routes
+            path: network/routes
+            namespace: default
+            wave: "6"
+            prune: true
+  
+  template:
+    metadata:
+      name: '{{.name}}'
+      namespace: argocd
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{.wave}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/amillerrr/homelab-single-proxmox-node.git
+        targetRevision: main
+        path: 'clusters/production/{{.path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{.namespace}}'
+      syncPolicy:
+        automated:
+          prune: '{{.prune}}'
+          selfHeal: true
+          allowEmpty: false
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
+      ignoreDifferences:
+        - group: apps
+          kind: Deployment
+          jsonPointers:
+            - /spec/replicas

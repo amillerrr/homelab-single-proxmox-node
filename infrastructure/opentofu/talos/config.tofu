@@ -38,6 +38,10 @@ resource "terraform_data" "cilium_bootstrap_inline_manifests" {
           "values.yaml" = file("${path.root}/${var.cluster.cilium.values_file_path}")
         }
       })
+    },
+    {
+      name     = "argocd-bootstrap"
+      contents = file("${path.module}/inline-manifests/argocd-install.yaml")
     }
   ]
 }
