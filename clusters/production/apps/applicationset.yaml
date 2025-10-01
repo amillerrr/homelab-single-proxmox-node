@@ -67,7 +67,7 @@ spec:
             - /spec/replicas
         - group: gateway.networking.k8s.io
           kind: HTTPRoute
-          jqPathExpressions:
+          jsonPointers:
             - /status
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -123,5 +123,5 @@ spec:
             - /spec/replicas
         - group: gateway.networking.k8s.io
           kind: HTTPRoute
-          jqPathExpressions:
+          jsonPointers:
             - /status
