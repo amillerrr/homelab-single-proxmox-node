@@ -33,16 +33,19 @@ patches:
       kind: Deployment
       name: argocd-server
 
-configMapGenerator:
-  - name: argocd-cmd-params-cm
-    namespace: argocd
-    behavior: merge
-    literals:
-      - application.namespaces=*
-      - server.insecure=true
+  - patch: |-
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: argocd-cmd-params-cm
+      data:
+        application.namespaces: "*"
+        server.insecure: "true"
+    target:
+      kind: ConfigMap
+      name: argocd-cmd-params-cm
 
-# Resource customization
-patches:
+  # Resource customization
   - patch: |-
       apiVersion: apps/v1
       kind: Deployment
