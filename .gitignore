@@ -42,9 +42,10 @@ kube-config.yaml
 *.p12
 *.pfx
 
-# Sealed secrets backup keys (NEVER commit!)
+# Sealed secrets backup keys
 sealed-secrets-key.yaml
 sealed-secrets-master-key*.yaml
+sealed-secrets-key-backup-*.yaml
 .sealed-secrets-backup/
 
 # But allow the sealed secret manifests
@@ -62,10 +63,6 @@ Thumbs.db
 *.swp
 *.swo
 *~
-
-# IDE
-.vscode/
-.idea/
 
 # Helm
 charts/*.tgz
