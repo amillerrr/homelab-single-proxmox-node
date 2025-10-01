@@ -37,13 +37,13 @@ resource "local_file" "talos_machine_configs" {
 
 resource "local_file" "talos_config" {
   content         = module.talos_cluster.client_configuration.talos_config
-  filename        = "output/talos-config.yaml"
+  filename        = pathexpand("~/.talos/config")
   file_permission = "0600"
 }
 
 resource "local_file" "kube_config" {
   content         = module.talos_cluster.kube_config.kubeconfig_raw
-  filename        = "output/kube-config.yaml"
+  filename        = pathexpand("~/.kube/talos-config")
   file_permission = "0600"
 }
 
