@@ -3,6 +3,9 @@ kind: Kustomization
 
 namespace: cert-manager
 
+resources:
+  - cainjector-rbac.yaml
+
 helmCharts:
   - name: cert-manager
     repo: https://charts.jetstack.io
