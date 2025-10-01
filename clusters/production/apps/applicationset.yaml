@@ -65,6 +65,10 @@ spec:
           kind: Deployment
           jsonPointers:
             - /spec/replicas
+        - group: gateway.networking.k8s.io
+          kind: HTTPRoute
+          jsonPointers:
+            - /status
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
