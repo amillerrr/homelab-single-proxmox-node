@@ -40,6 +40,10 @@ resource "terraform_data" "cilium_bootstrap_inline_manifests" {
       })
     },
     {
+      name     = "gateway-api-bootstrap"
+      contents = file("${path.module}/inline-manifests/gateway-api-bootstrap.yaml")
+    },
+    {
       name     = "argocd-bootstrap"
       contents = file("${path.module}/inline-manifests/argocd-install.yaml")
     }
