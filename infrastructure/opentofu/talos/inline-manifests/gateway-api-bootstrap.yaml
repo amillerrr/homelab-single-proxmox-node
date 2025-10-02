@@ -34,7 +34,7 @@ spec:
       serviceAccountName: gateway-api-installer
       containers:
         - name: installer
-          image: bitnami/kubectl:latest
+          image: alpine/k8s:1.31.13
           command:
             - sh
             - -c
