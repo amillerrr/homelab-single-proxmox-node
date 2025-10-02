@@ -26,10 +26,6 @@ resource "terraform_data" "cilium_bootstrap_inline_manifests" {
       contents = file("${path.root}/${var.cluster.cilium.bootstrap_manifest_path}")
     },
     {
-      name     = "gateway-api-bootstrap"
-      contents = file("${path.module}/inline-manifests/gateway-api-bootstrap.yaml")
-    },
-    {
       name = "cilium-values"
       contents = yamlencode({
         apiVersion = "v1"

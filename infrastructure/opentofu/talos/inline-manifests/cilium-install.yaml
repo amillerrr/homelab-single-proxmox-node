@@ -33,21 +33,6 @@ spec:
       restartPolicy: OnFailure
       tolerations:
         - operator: Exists
-        - effect: NoSchedule
-          operator: Exists
-        - effect: NoExecute
-          operator: Exists
-        - effect: PreferNoSchedule
-          operator: Exists
-        - key: node-role.kubernetes.io/control-plane
-          operator: Exists
-          effect: NoSchedule
-        - key: node-role.kubernetes.io/control-plane
-          operator: Exists
-          effect: NoExecute
-        - key: node-role.kubernetes.io/control-plane
-          operator: Exists
-          effect: PreferNoSchedule
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -59,7 +44,7 @@ spec:
       hostNetwork: true
       containers:
         - name: cilium-install
-          image: quay.io/cilium/cilium-cli:v0.18.7 
+          image: quay.io/cilium/cilium-cli:v0.18.7
           env:
             - name: KUBERNETES_SERVICE_HOST
               valueFrom:
@@ -73,13 +58,38 @@ spec:
               mountPath: /root/app/values.yaml
               subPath: values.yaml
           command:
-            - cilium
-            - install
-            - --version=v1.18.2 
-            - --set
-            - kubeProxyReplacement=true
-            - --values
-            - values.yaml
+            - sh
+            - -c
+            - |
+              set -e
+              echo "Waiting for Gateway API CRDs to be available..."
+              
+              # Wait up to 5 minutes for Gateway API CRDs
+              timeout=300
+              elapsed=0
+              while [ $elapsed -lt $timeout ]; do
+                if kubectl get crd gatewayclasses.gateway.networking.k8s.io 2>/dev/null && \
+                   kubectl get crd gateways.gateway.networking.k8s.io 2>/dev/null && \
+                   kubectl get crd httproutes.gateway.networking.k8s.io 2>/dev/null; then
+                  echo "✓ Gateway API CRDs are available"
+                  break
+                fi
+                echo "Waiting for Gateway API CRDs... ($elapsed/$timeout seconds)"
+                sleep 5
+                elapsed=$((elapsed + 5))
+              done
+              
+              if [ $elapsed -ge $timeout ]; then
+                echo "Warning: Gateway API CRDs not found after $timeout seconds, continuing anyway..."
+              fi
+              
+              echo "Installing Cilium..."
+              cilium install \
+                --version=v1.18.2 \
+                --set kubeProxyReplacement=true \
+                --values /root/app/values.yaml
+              
+              echo "✓ Cilium installation complete"
       volumes:
         - name: values
           configMap:
