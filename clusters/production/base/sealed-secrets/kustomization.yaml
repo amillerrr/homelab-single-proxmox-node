@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: sealed-secrets
 
 resources:
+  - namespace.yaml
   - sealedsecret-crd.yaml
 
 helmCharts:

@@ -5,6 +5,8 @@ namespace: cert-manager
 
 resources:
   - cainjector-rbac.yaml
+  - cloudflare-token-sealed.yaml
+  - cluster-issuer.yaml
 
 helmCharts:
   - name: cert-manager
