@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: wildcard-mill3r-la
+  namespace: gateway
+spec:
+  secretName: wildcard-mill3r-la-tls
+  issuerRef:
+    name: cloudflare-cluster-issuer
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.mill3r.la"
+    - mill3r.la
+  privateKey:
+    algorithm: RSA
+    size: 2048

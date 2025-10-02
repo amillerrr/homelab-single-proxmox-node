@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: gateway
+
+resources:
+  - wildcard-certificate.yaml
+
+commonLabels:
+  app.kubernetes.io/part-of: certificates
+  app.kubernetes.io/managed-by: argocd

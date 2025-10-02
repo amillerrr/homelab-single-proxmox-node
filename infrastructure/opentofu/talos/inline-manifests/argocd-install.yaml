@@ -5,13 +5,56 @@ metadata:
   name: argocd
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: argocd-bootstrap
+rules:
+  # Namespace management
+  - apiGroups: [""]
+    resources: [namespaces]
+    verbs: [get, list, create, update, patch]
+  
+  # Core resources
+  - apiGroups: [""]
+    resources: [configmaps, services, serviceaccounts, secrets]
+    verbs: [get, list, create, update, patch]
+  
+  # Workload resources
+  - apiGroups: [apps]
+    resources: [deployments, statefulsets, replicasets]
+    verbs: [get, list, create, update, patch, watch]
+  
+  # RBAC
+  - apiGroups: [rbac.authorization.k8s.io]
+    resources: [roles, rolebindings, clusterroles, clusterrolebindings]
+    verbs: [get, list, create, update, patch]
+  
+  # ArgoCD CRDs
+  - apiGroups: [argoproj.io]
+    resources: [applications, applicationsets, appprojects]
+    verbs: ["*"]
+  
+  # Networking
+  - apiGroups: [""]
+    resources: [endpoints]
+    verbs: [get, list]
+  - apiGroups: [networking.k8s.io]
+    resources: [networkpolicies, ingresses]
+    verbs: [get, list, create, update, patch]
+  
+  # CustomResourceDefinitions
+  - apiGroups: [apiextensions.k8s.io]
+    resources: [customresourcedefinitions]
+    verbs: [get, list, create, update, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: argocd-bootstrap
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cluster-admin
+  name: argocd-bootstrap
 subjects:
   - kind: ServiceAccount
     name: argocd-bootstrap
@@ -39,8 +82,8 @@ spec:
       serviceAccountName: argocd-bootstrap
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        fsGroup: 1000
+        runAsUser: 65532
+        fsGroup: 65532
         seccompProfile:
           type: RuntimeDefault
       tolerations:
@@ -57,16 +100,24 @@ spec:
                     operator: Exists
       containers:
         - name: argocd-bootstrap
-          image: alpine/k8s:1.31.13
+          image: alpine/k8s:1.31.3
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
-            runAsUser: 1000
+            runAsUser: 65532
             capabilities:
               drop:
                 - ALL
             seccompProfile:
               type: RuntimeDefault
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
           command:
             - sh
             - -c
@@ -88,7 +139,7 @@ spec:
               
               # Apply ArgoCD from Git
               echo "Applying ArgoCD manifests"
-              kubectl apply -k https://github.com/amillerrr/homelab-single-proxmox-node/clusters/production/base/argocd?ref=main
+              kubectl apply -k https://github.com/amillerrr/homelab-single-proxmox-node/clusters/production/infrastructure/argocd?ref=main
               
               echo "Waiting for ArgoCD deployments..."
               kubectl wait --for=condition=available --timeout=600s \
@@ -110,6 +161,6 @@ spec:
               echo "ArgoCD components ready"
               
               echo "Applying ApplicationSet"
-              kubectl apply -f https://raw.githubusercontent.com/amillerrr/homelab-single-proxmox-node/main/clusters/production/apps/applicationset.yaml
+              kubectl apply -f https://raw.githubusercontent.com/amillerrr/homelab-single-proxmox-node/main/clusters/production/bootstrap/applicationset.yaml
               
               echo "ApplicationSet deployed"
