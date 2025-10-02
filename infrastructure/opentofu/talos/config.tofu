@@ -1,10 +1,11 @@
 locals {
   first_control_plane_node_ip = [for k, v in var.nodes : v.ip if v.machine_type == "controlplane"][0]
   kubernetes_endpoint         = coalesce(var.cluster.vip, local.first_control_plane_node_ip)
+  
+  # Only include Gateway API CRDs as extra manifests
+  # ArgoCD will manage other resources via ApplicationSet
   extra_manifests = concat(var.cluster.extra_manifests, [
     "https://github.com/kubernetes-sigs/gateway-api/releases/download/${var.cluster.gateway_api_version}/standard-install.yaml",
-    "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${var.cluster.gateway_api_version}/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml",
-    "https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/charts/crds/crds/crd-servicemonitors.yaml"
   ])
 }
 
@@ -19,25 +20,27 @@ data "talos_client_configuration" "this" {
   endpoints            = [for k, v in var.nodes : v.ip if v.machine_type == "controlplane"]
 }
 
-resource "terraform_data" "cilium_bootstrap_inline_manifests" {
+# Bootstrap manifests for cluster initialization
+# These run once during cluster creation
+resource "terraform_data" "inline_manifests" {
   input = [
     {
-      name     = "cilium-bootstrap"
-      contents = file("${path.root}/${var.cluster.cilium.bootstrap_manifest_path}")
-    },
-    {
-      name = "cilium-values"
+      name = "cilium-helm-values"
       contents = yamlencode({
         apiVersion = "v1"
         kind       = "ConfigMap"
         metadata = {
-          name      = "cilium-values"
+          name      = "cilium-helm-values"
           namespace = "kube-system"
         }
         data = {
           "values.yaml" = file("${path.root}/${var.cluster.cilium.values_file_path}")
         }
       })
+    },
+    {
+      name     = "cilium-bootstrap"
+      contents = file("${path.module}/inline-manifests/cilium-install.yaml")
     },
     {
       name     = "argocd-bootstrap"
@@ -73,7 +76,7 @@ data "talos_machine_configuration" "this" {
       vip              = var.cluster.vip
       extra_manifests  = jsonencode(local.extra_manifests)
       api_server       = var.cluster.api_server
-      inline_manifests = jsonencode(terraform_data.cilium_bootstrap_inline_manifests.output)
+      inline_manifests = jsonencode(terraform_data.inline_manifests.output)
     }) :
     templatefile("${path.module}/machine-config/worker.yaml.tftpl", {
       ip          = each.value.ip

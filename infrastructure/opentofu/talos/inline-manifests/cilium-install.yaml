@@ -1,12 +1,23 @@
 ---
 apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cilium-install
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+  - nonResourceURLs: ["*"]
+    verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: cilium-install
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: cluster-admin
+  name: cilium-install
 subjects:
   - kind: ServiceAccount
     name: cilium-install
@@ -31,6 +42,13 @@ spec:
         app: cilium-install
     spec:
       restartPolicy: OnFailure
+      serviceAccountName: cilium-install
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
       tolerations:
         - operator: Exists
       affinity:
@@ -40,11 +58,27 @@ spec:
               - matchExpressions:
                   - key: node-role.kubernetes.io/control-plane
                     operator: Exists
-      serviceAccountName: cilium-install
       hostNetwork: true
       containers:
         - name: cilium-install
-          image: quay.io/cilium/cilium-cli:v0.18.7
+          image: quay.io/cilium/cilium-cli:v0.16.19
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65532
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
           env:
             - name: KUBERNETES_SERVICE_HOST
               valueFrom:
@@ -55,17 +89,35 @@ spec:
               value: "6443"
           volumeMounts:
             - name: values
-              mountPath: /root/app/values.yaml
+              mountPath: /tmp/values.yaml
               subPath: values.yaml
           command:
-            - cilium
-            - install
-            - --version=v1.18.2
-            - --set
-            - kubeProxyReplacement=true
-            - --values
-            - values.yaml
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "Installing Cilium via Helm..."
+              
+              # Wait for API to be ready
+              until kubectl get nodes > /dev/null 2>&1; do
+                echo "Waiting for Kubernetes API..."
+                sleep 5
+              done
+              
+              # Install Cilium using CLI with values file
+              cilium install \
+                --version=1.18.2 \
+                --values=/tmp/values.yaml \
+                --wait \
+                --wait-duration=5m
+              
+              echo "Cilium installation complete"
+              
+              # Wait for Cilium to be ready
+              cilium status --wait --wait-duration=5m
+              
+              echo "Cilium is ready"
       volumes:
         - name: values
           configMap:
-            name: cilium-values
+            name: cilium-helm-values
