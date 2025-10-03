@@ -5,61 +5,13 @@ metadata:
   name: argocd
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: argocd-bootstrap
-rules:
-  # Namespace management
-  - apiGroups: [""]
-    resources: [namespaces]
-    verbs: [get, list, create, update, patch]
-  
-  # Core resources
-  - apiGroups: [""]
-    resources: [configmaps, services, serviceaccounts, secrets]
-    verbs: [get, list, create, update, patch]
-
-  # Node listing for API readiness check
-  - apiGroups: [""]
-    resources: [nodes]
-    verbs: [get, list]
-  
-  # Workload resources
-  - apiGroups: [apps]
-    resources: [deployments, statefulsets, replicasets]
-    verbs: [get, list, create, update, patch, watch]
-  
-  # RBAC
-  - apiGroups: [rbac.authorization.k8s.io]
-    resources: [roles, rolebindings, clusterroles, clusterrolebindings]
-    verbs: [get, list, create, update, patch]
-  
-  # ArgoCD CRDs
-  - apiGroups: [argoproj.io]
-    resources: [applications, applicationsets, appprojects]
-    verbs: ["*"]
-  
-  # Networking
-  - apiGroups: [""]
-    resources: [endpoints]
-    verbs: [get, list]
-  - apiGroups: [networking.k8s.io]
-    resources: [networkpolicies, ingresses]
-    verbs: [get, list, create, update, patch]
-  
-  # CustomResourceDefinitions
-  - apiGroups: [apiextensions.k8s.io]
-    resources: [customresourcedefinitions]
-    verbs: [get, list, create, update, patch]
----
-apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: argocd-bootstrap
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: argocd-bootstrap
+  name: cluster-admin  # Use built-in cluster-admin role
 subjects:
   - kind: ServiceAccount
     name: argocd-bootstrap
@@ -117,8 +69,8 @@ spec:
               type: RuntimeDefault
             readOnlyRootFilesystem: true
           volumeMounts:
-          - name: tmp
-            mountPath: /tmp
+            - name: tmp
+              mountPath: /tmp
           resources:
             requests:
               cpu: 100m
