@@ -14,64 +14,55 @@ spec:
             path: infrastructure/sealed-secrets
             namespace: sealed-secrets
             wave: "1"
-            prune: "true"
-          
+            prune: true
           # Wave 3: Certificate Management (skip wave 2 for timing)
           - name: cert-manager
             path: infrastructure/cert-manager
             namespace: cert-manager
             wave: "3"
-            prune: "true"
-          
+            prune: true
           # Wave 5: Cert Manager Configuration (needs time for sealed secret)
           - name: cert-manager-config
             path: config/cert-manager
             namespace: cert-manager
             wave: "5"
-            prune: "true"
-          
+            prune: true
           # Wave 6: Wildcard Certificate
           - name: wildcard-certificate
             path: config/certificates
             namespace: gateway
             wave: "6"
-            prune: "true"
-          
+            prune: true
           # Wave 7: Gateway Resources
           - name: gateway
             path: infrastructure/gateway
             namespace: gateway
             wave: "7"
-            prune: "true"
-          
+            prune: true
           # Wave 8: Cilium Configuration (NOT the CNI itself, just config)
           - name: cilium-config
             path: platform/cilium
             namespace: kube-system
             wave: "8"
-            prune: "false"
-          
+            prune: false
           # Wave 9: Network Policies
           - name: network-policies
             path: config/network-policies
             namespace: default
             wave: "9"
-            prune: "true"
-          
+            prune: true
           # Wave 10: Application Routes
           - name: routes
             path: config/routes
             namespace: default
             wave: "10"
-            prune: "true"
-          
+            prune: true
           # Wave 11: Applications
           - name: nginx-example
             path: apps/nginx-example
             namespace: default
             wave: "11"
-            prune: "true"
-          
+            prune: true
   template:
     metadata:
       name: "{{.name}}"
@@ -91,7 +82,7 @@ spec:
         namespace: "{{.namespace}}"
       syncPolicy:
         automated:
-          prune: {{.prune}}
+          prune: {{ .prune }}
           selfHeal: true
           allowEmpty: false
         syncOptions:

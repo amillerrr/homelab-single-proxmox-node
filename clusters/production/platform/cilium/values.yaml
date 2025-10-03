@@ -35,7 +35,7 @@ operator:
     enabled: true
     port: 9963
     serviceMonitor:
-      enabled: true
+      enabled: false
   dashboards:
     enabled: true
   resources:
@@ -93,7 +93,7 @@ hubble:
     enableOpenMetrics: true
     port: 9965
     serviceMonitor:
-      enabled: true
+      enabled: false
     dashboards:
       enabled: true
   relay:
@@ -103,7 +103,7 @@ hubble:
       enabled: true
       port: 9966
       serviceMonitor:
-        enabled: true
+        enabled: false
   ui:
     enabled: true
     rollOutPods: true
@@ -116,7 +116,7 @@ clustermesh:
       enabled: true
       port: 9962
       serviceMonitor:
-        enabled: true
+        enabled: false
 
 # mTLS
 authentication:
