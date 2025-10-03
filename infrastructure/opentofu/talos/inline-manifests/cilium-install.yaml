@@ -91,6 +91,8 @@ spec:
             - name: values
               mountPath: /tmp/values.yaml
               subPath: values.yaml
+            - name: cache
+              mountPath: /home/nonroot/.cache
           command:
             - cilium
           args:
@@ -103,3 +105,5 @@ spec:
         - name: values
           configMap:
             name: cilium-helm-values
+        - name: cache
+          emptyDir: {}
