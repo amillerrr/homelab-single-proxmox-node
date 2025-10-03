@@ -18,6 +18,11 @@ rules:
   - apiGroups: [""]
     resources: [configmaps, services, serviceaccounts, secrets]
     verbs: [get, list, create, update, patch]
+
+  # Node listing for API readiness check
+  - apiGroups: [""]
+    resources: [nodes]
+    verbs: [get, list]
   
   # Workload resources
   - apiGroups: [apps]
@@ -111,6 +116,9 @@ spec:
             seccompProfile:
               type: RuntimeDefault
             readOnlyRootFilesystem: true
+          volumeMounts:
+          - name: tmp
+            mountPath: /tmp
           resources:
             requests:
               cpu: 100m
@@ -164,3 +172,6 @@ spec:
               kubectl apply -f https://raw.githubusercontent.com/amillerrr/homelab-single-proxmox-node/main/clusters/production/bootstrap/applicationset.yaml
               
               echo "ApplicationSet deployed"
+      volumes:
+        - name: tmp
+          emptyDir: {}
