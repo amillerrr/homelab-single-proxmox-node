@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: argocd-server
+  name: argocd-server-network-policy
   namespace: argocd
 spec:
   podSelector:
@@ -11,72 +11,31 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow from Gateway namespace
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: gateway
-      ports:
-        - protocol: TCP
-          port: 8080
-    # Allow from cluster (internal access)
+    # Allow from anywhere in cluster
     - from:
         - namespaceSelector: {}
       ports:
         - protocol: TCP
           port: 8080
+        - protocol: TCP
+          port: 8083
   egress:
-    # Allow to Kubernetes API (in default namespace!)
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: default
-        - podSelector:
-            matchLabels:
-              component: apiserver
-      ports:
-        - protocol: TCP
-          port: 443
-    # Also allow direct to kubernetes service IP
-    - to:
-        - namespaceSelector: {}
-      ports:
-        - protocol: TCP
-          port: 6443  # Direct API access
-        - protocol: TCP
-          port: 443   # Service API access
-    # Allow to Kubernetes API
-    - to:
-        - namespaceSelector: {}
-      ports:
+    # Allow to Kubernetes API (no selector = allow to any IP on these ports)
+    - ports:
         - protocol: TCP
           port: 443
         - protocol: TCP
           port: 6443
-    # Allow to repo-server and other ArgoCD components
-    - to:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/part-of: argocd
-      ports:
-        - protocol: TCP
-          port: 8081
-        - protocol: TCP
-          port: 8082
     # Allow DNS
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: kube-system
-        - podSelector:
-            matchLabels:
-              k8s-app: kube-dns
       ports:
         - protocol: UDP
           port: 53
-    # Allow to external Git repositories
-    - ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 22
+    # Allow to other ArgoCD components
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/part-of: argocd
