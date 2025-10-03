@@ -45,6 +45,14 @@ spec:
           port: 6443  # Direct API access
         - protocol: TCP
           port: 443   # Service API access
+    # Allow to Kubernetes API
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 6443
     # Allow to repo-server and other ArgoCD components
     - to:
         - podSelector:
