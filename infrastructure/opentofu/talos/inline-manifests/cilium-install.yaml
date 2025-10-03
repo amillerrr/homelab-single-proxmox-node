@@ -61,7 +61,7 @@ spec:
       hostNetwork: true
       containers:
         - name: cilium-install
-          image: quay.io/cilium/cilium-cli:v0.16.19
+          image: quay.io/cilium/cilium-cli:v0.18.7
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
