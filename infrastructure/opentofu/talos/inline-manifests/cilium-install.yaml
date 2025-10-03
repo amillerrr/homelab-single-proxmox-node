@@ -92,31 +92,13 @@ spec:
               mountPath: /tmp/values.yaml
               subPath: values.yaml
           command:
-            - /bin/sh
-            - -c
-            - |
-              set -e
-              echo "Installing Cilium via Helm..."
-              
-              # Wait for API to be ready
-              until kubectl get nodes > /dev/null 2>&1; do
-                echo "Waiting for Kubernetes API..."
-                sleep 5
-              done
-              
-              # Install Cilium using CLI with values file
-              cilium install \
-                --version=1.18.2 \
-                --values=/tmp/values.yaml \
-                --wait \
-                --wait-duration=5m
-              
-              echo "Cilium installation complete"
-              
-              # Wait for Cilium to be ready
-              cilium status --wait --wait-duration=5m
-              
-              echo "Cilium is ready"
+            - cilium
+          args:
+            - install
+            - --version=1.18.2
+            - --values=/tmp/values.yaml
+            - --wait
+            - --wait-duration=10m
       volumes:
         - name: values
           configMap:
