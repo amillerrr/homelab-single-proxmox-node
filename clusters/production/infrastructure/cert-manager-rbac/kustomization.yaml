@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: kube-system  # Important: these resources go in kube-system
 
 resources:
-  - cainjector-rbac.yaml
+  - rbac.yaml
 
 commonLabels:
   app.kubernetes.io/part-of: cert-manager
