@@ -26,7 +26,6 @@ helmCharts:
           cpu: 100m
           memory: 128Mi
       webhook:
-        timeoutSeconds: 30
         resources:
           requests:
             cpu: 10m
