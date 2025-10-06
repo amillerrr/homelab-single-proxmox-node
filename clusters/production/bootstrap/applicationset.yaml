@@ -86,16 +86,6 @@ spec:
           kind: HTTPRoute
           jsonPointers:
             - /status
-        - group: admissionregistration.k8s.io
-          kind: ValidatingWebhookConfiguration
-          name: cert-manager-webhook
-          jsonPointers:
-            - /webhooks/0/clientConfig/caBundle
-        - group: admissionregistration.k8s.io
-          kind: MutatingWebhookConfiguration  
-          name: cert-manager-webhook
-          jsonPointers:
-            - /webhooks/0/clientConfig/caBundle
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
