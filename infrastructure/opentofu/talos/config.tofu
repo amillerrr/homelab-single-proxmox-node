@@ -5,7 +5,7 @@ locals {
   # Only include Gateway API CRDs as extra manifests
   # ArgoCD will manage other resources via ApplicationSet
   extra_manifests = concat(var.cluster.extra_manifests, [
-    "https://github.com/kubernetes-sigs/gateway-api/releases/download/${var.cluster.gateway_api_version}/standard-install.yaml",
+    "https://github.com/kubernetes-sigs/gateway-api/releases/download/v${var.cluster.gateway_api_version}/standard-install.yaml",
   ])
 }
 
