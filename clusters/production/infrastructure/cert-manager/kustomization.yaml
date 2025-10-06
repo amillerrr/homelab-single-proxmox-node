@@ -3,6 +3,9 @@ kind: Kustomization
 
 namespace: cert-manager
 
+resources:
+  - cainjector-leaderelection-rbac.yaml
+
 helmCharts:
   - name: cert-manager
     repo: https://charts.jetstack.io
@@ -23,6 +26,7 @@ helmCharts:
           cpu: 100m
           memory: 128Mi
       webhook:
+        timeoutSeconds: 30
         resources:
           requests:
             cpu: 10m
