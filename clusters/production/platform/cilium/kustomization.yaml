@@ -7,6 +7,6 @@ resources:
   - announce.yaml
   - ip-pool.yaml
 
-commonLabels:
+commonAnnotations:
   app.kubernetes.io/component: cilium
   app.kubernetes.io/managed-by: argocd

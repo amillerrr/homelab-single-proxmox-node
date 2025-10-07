@@ -39,6 +39,6 @@ helmCharts:
             cpu: 100m
             memory: 128Mi
 
-commonLabels:
+commonAnnotations:
   app.kubernetes.io/part-of: cert-manager
   app.kubernetes.io/managed-by: argocd

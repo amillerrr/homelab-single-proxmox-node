@@ -6,6 +6,6 @@ namespace: kube-system  # Important: these resources go in kube-system
 resources:
   - rbac.yaml
 
-commonLabels:
+commonAnnotations:
   app.kubernetes.io/part-of: cert-manager
   app.kubernetes.io/managed-by: argocd

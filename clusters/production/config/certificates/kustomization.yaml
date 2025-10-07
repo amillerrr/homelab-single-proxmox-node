@@ -6,6 +6,6 @@ namespace: gateway
 resources:
   - wildcard-certificate.yaml
 
-commonLabels:
+commonAnnotations:
   app.kubernetes.io/part-of: certificates
   app.kubernetes.io/managed-by: argocd

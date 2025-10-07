@@ -21,3 +21,8 @@ spec:
         - ports:
             - port: "53"
               protocol: ANY
+    # Allow access to Kubernetes API
+    - toServices:
+        - k8sService:
+            serviceName: kubernetes
+            namespace: default

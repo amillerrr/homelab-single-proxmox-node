@@ -38,6 +38,6 @@ helmCharts:
           type: RuntimeDefault
       priorityClassName: system-cluster-critical
 
-commonLabels:
+commonAnnotations:
   app.kubernetes.io/part-of: sealed-secrets
   app.kubernetes.io/managed-by: argocd

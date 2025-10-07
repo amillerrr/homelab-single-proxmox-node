@@ -5,12 +5,13 @@ metadata:
   namespace: default
   labels:
     app: nginx
+    app.kubernetes.io/managed-by: argocd
 spec:
   endpointSelector:
     matchLabels:
       app: nginx
   ingress:
-    # Allow traffic from Cilium Gateway (envoy proxies in cilium-agent pods)
+    # Allow from Cilium Gateway (envoy in cilium-agent pods)
     - fromEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: kube-system
@@ -20,7 +21,7 @@ spec:
             - port: "8080"
               protocol: TCP
   egress:
-    # Allow DNS queries
+    # Allow DNS
     - toEndpoints:
         - matchLabels:
             k8s:io.kubernetes.pod.namespace: kube-system

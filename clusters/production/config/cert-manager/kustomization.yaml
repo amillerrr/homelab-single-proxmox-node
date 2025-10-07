@@ -8,6 +8,6 @@ resources:
   - cluster-issuer.yaml
   - network-policy.yaml
 
-commonLabels:
+commonAnnotations:
   app.kubernetes.io/part-of: cert-manager
   app.kubernetes.io/managed-by: argocd

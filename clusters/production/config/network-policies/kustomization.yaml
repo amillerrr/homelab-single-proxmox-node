@@ -7,6 +7,3 @@ resources:
   - default-deny.yaml
   - allow-dns.yaml
 
-commonLabels:
-  app.kubernetes.io/part-of: network-policies
-  app.kubernetes.io/managed-by: argocd
