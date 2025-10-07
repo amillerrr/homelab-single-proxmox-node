@@ -10,34 +10,35 @@ spec:
   policyTypes:
     - Egress
   egress:
+    - {}
     # Allow DNS
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
-    # Allow Kubernetes API access (required for all cert-manager components)
-    - to:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: default
-        - podSelector:
-            matchLabels:
-              component: apiserver
-      ports:
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 6443
-    # Allow HTTPS to external APIs (Cloudflare, Let's Encrypt)
-    - ports:
-        - protocol: TCP
-          port: 443
-    # Allow HTTP (for ACME challenges if needed)
-    - ports:
-        - protocol: TCP
-          port: 80
+    # - to:
+    #     - namespaceSelector:
+    #         matchLabels:
+    #           kubernetes.io/metadata.name: kube-system
+    #   ports:
+    #     - protocol: UDP
+    #       port: 53
+    #     - protocol: TCP
+    #       port: 53
+    # # Allow Kubernetes API access (required for all cert-manager components)
+    # - to:
+    #     - namespaceSelector:
+    #         matchLabels:
+    #           kubernetes.io/metadata.name: default
+    #     - podSelector:
+    #         matchLabels:
+    #           component: apiserver
+    #   ports:
+    #     - protocol: TCP
+    #       port: 443
+    #     - protocol: TCP
+    #       port: 6443
+    # # Allow HTTPS to external APIs (Cloudflare, Let's Encrypt)
+    # - ports:
+    #     - protocol: TCP
+    #       port: 443
+    # # Allow HTTP (for ACME challenges if needed)
+    # - ports:
+    #     - protocol: TCP
+    #       port: 80
