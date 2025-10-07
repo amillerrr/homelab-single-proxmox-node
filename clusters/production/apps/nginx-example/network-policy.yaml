@@ -3,6 +3,9 @@ kind: NetworkPolicy
 metadata:
   name: nginx
   namespace: default
+  labels:
+    app.kubernetes.io/name: nginx
+    app.kubernetes.io/managed-by: argocd
 spec:
   podSelector:
     matchLabels:
@@ -11,7 +14,7 @@ spec:
     - Ingress
     - Egress
   ingress:
-    # Allow from kube-system
+    # Allow from Cilium agents
     - from:
         - namespaceSelector:
             matchLabels:
