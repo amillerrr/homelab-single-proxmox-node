@@ -1,31 +1,32 @@
-apiVersion: cilium.io/v2
-kind: CiliumNetworkPolicy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
 metadata:
   name: nginx
   namespace: default
-  labels:
-    app: nginx
 spec:
-  endpointSelector:
+  podSelector:
     matchLabels:
       app: nginx
+  policyTypes:
+    - Ingress
+    - Egress
   ingress:
-    # Allow traffic from Cilium Gateway (envoy proxies in cilium-agent pods)
-    - fromEndpoints:
-        - matchLabels:
-            k8s:io.kubernetes.pod.namespace: kube-system
-            k8s-app: cilium
-      toPorts:
-        - ports:
-            - port: "8080"
-              protocol: TCP
+    # Allow from kube-system namespace
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: TCP
+          port: 8080
   egress:
-    # Allow DNS queries
-    - toEndpoints:
-        - matchLabels:
-            k8s:io.kubernetes.pod.namespace: kube-system
-            k8s-app: kube-dns
-      toPorts:
-        - ports:
-            - port: "53"
-              protocol: ANY
+    # Allow DNS to kube-system
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
