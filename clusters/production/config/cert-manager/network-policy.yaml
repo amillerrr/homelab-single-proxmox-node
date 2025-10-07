@@ -1,44 +1,53 @@
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
 metadata:
   name: cert-manager-egress
   namespace: cert-manager
 spec:
-  podSelector:
+  endpointSelector:
     matchLabels:
       app.kubernetes.io/instance: cert-manager
-  policyTypes:
-    - Egress
   egress:
-    - {}
     # Allow DNS
-    # - to:
-    #     - namespaceSelector:
-    #         matchLabels:
-    #           kubernetes.io/metadata.name: kube-system
-    #   ports:
-    #     - protocol: UDP
-    #       port: 53
-    #     - protocol: TCP
-    #       port: 53
-    # # Allow Kubernetes API access (required for all cert-manager components)
-    # - to:
-    #     - namespaceSelector:
-    #         matchLabels:
-    #           kubernetes.io/metadata.name: default
-    #     - podSelector:
-    #         matchLabels:
-    #           component: apiserver
-    #   ports:
-    #     - protocol: TCP
-    #       port: 443
-    #     - protocol: TCP
-    #       port: 6443
-    # # Allow HTTPS to external APIs (Cloudflare, Let's Encrypt)
-    # - ports:
-    #     - protocol: TCP
-    #       port: 443
-    # # Allow HTTP (for ACME challenges if needed)
-    # - ports:
-    #     - protocol: TCP
-    #       port: 80
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+    
+    # Allow Kubernetes API server
+    - toServices:
+        - k8sService:
+            serviceName: kubernetes
+            namespace: default
+    
+    # Allow Cloudflare API
+    - toFQDNs:
+        - matchName: "api.cloudflare.com"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    
+    # Allow Let's Encrypt ACME
+    - toFQDNs:
+        - matchName: "acme-v02.api.letsencrypt.org"
+        - matchName: "acme-staging-v02.api.letsencrypt.org"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+    
+    # Allow OCSP responders (for certificate validation)
+    - toFQDNs:
+        - matchPattern: "*.lencr.org"
+        - matchPattern: "*.digicert.com"
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+            - port: "443"
+              protocol: TCP
