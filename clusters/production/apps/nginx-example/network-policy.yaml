@@ -14,17 +14,18 @@ spec:
     - Ingress
     - Egress
   ingress:
+    - {}
     # Allow from Cilium agents
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
-          podSelector:
-            matchLabels:
-              k8s-app: cilium
-      ports:
-        - protocol: TCP
-          port: 8080
+    # - from:
+    #     - namespaceSelector:
+    #         matchLabels:
+    #           kubernetes.io/metadata.name: kube-system
+    #       podSelector:
+    #         matchLabels:
+    #           k8s-app: cilium
+    #   ports:
+    #     - protocol: TCP
+    #       port: 8080
   egress:
     # Allow DNS
     - to:
