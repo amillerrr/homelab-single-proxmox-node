@@ -23,10 +23,6 @@ cgroup:
 bpf:
   hostLegacyRouting: true
 
-tunnelProtocol: disabled  # Disable VXLAN tunnels
-autoDirectNodeRoutes: true  # Use direct routing instead
-ipv4NativeRoutingCIDR: 10.0.70.0/24
-
 # https://docs.cilium.io/en/stable/network/concepts/ipam/
 ipam:
   mode: kubernetes
