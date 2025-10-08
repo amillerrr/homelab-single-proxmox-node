@@ -16,7 +16,7 @@ grafana:
   persistence:
     enabled: true
     size: 5Gi
-    storageClassName: local-path  # Adjust to your storage class
+    storageClassName: local-lvm
   
   # Service configuration
   service:

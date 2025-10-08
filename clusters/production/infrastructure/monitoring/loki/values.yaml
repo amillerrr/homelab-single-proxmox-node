@@ -59,7 +59,7 @@ loki:
     persistence:
       enabled: true
       size: 10Gi
-      storageClass: local-path  # Adjust to your storage class
+      storageClass: local-lvm
     
     # Security context
     securityContext:

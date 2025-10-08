@@ -43,22 +43,18 @@ spec:
             namespace: default
             wave: "10"
           # Monitoring Stack
-          - name: monitoring-namespace
-            path: infrastructure/monitoring
+          - name: kube-prometheus-stack
+            path: infrastructure/monitoring/prometheus
             namespace: monitoring
             wave: "11"
-          - name: kube-prometheus-stack
-            path: infrastructure/kube-prometheus-stack
+          - name: loki-stack
+            path: infrastructure/monitoring/loki
             namespace: monitoring
             wave: "12"
-          - name: loki-stack
-            path: infrastructure/loki-stack
+          - name: monitoring-routes
+            path: config/monitoring
             namespace: monitoring
             wave: "13"
-          - name: monitoring-routes
-            path: config/monitoring-routes
-            namespace: monitoring
-            wave: "14"
   template:
     metadata:
       name: "{{.name}}"
