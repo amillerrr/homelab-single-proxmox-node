@@ -3,7 +3,7 @@ kind: Kustomization
 
 namespace: default
 
-resources:
-  - default-deny.yaml
-  - allow-dns.yaml
+resources: []
+  # - default-deny.yaml
+  # - allow-dns.yaml
 
