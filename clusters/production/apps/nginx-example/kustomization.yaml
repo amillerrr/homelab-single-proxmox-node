@@ -5,5 +5,4 @@ namespace: default
 
 resources:
   - deployment.yaml
-  # - cilium-network-policy.yaml
 

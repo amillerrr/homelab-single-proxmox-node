@@ -7,7 +7,6 @@ resources:
   - gateway-class.yaml
   - gateway-internal.yaml
   - gateway-external.yaml
-  - network-policy.yaml
 
 commonAnnotations:
   app.kubernetes.io/part-of: gateway

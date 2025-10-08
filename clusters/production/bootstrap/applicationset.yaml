@@ -34,18 +34,14 @@ spec:
             path: infrastructure/gateway
             namespace: gateway
             wave: "7"
-          # - name: network-policies
-          #   path: config/network-policies
-          #   namespace: default
-          #   wave: "9"
           - name: routes
             path: config/routes
             namespace: default
-            wave: "10"
+            wave: "9"
           - name: nginx-example
             path: apps/nginx-example
             namespace: default
-            wave: "11"
+            wave: "10"
   template:
     metadata:
       name: "{{.name}}"
