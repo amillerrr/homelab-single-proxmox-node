@@ -42,6 +42,23 @@ spec:
             path: apps/nginx-example
             namespace: default
             wave: "10"
+          # Monitoring Stack
+          - name: monitoring-namespace
+            path: infrastructure/monitoring
+            namespace: monitoring
+            wave: "11"
+          - name: kube-prometheus-stack
+            path: infrastructure/kube-prometheus-stack
+            namespace: monitoring
+            wave: "12"
+          - name: loki-stack
+            path: infrastructure/loki-stack
+            namespace: monitoring
+            wave: "13"
+          - name: monitoring-routes
+            path: config/monitoring-routes
+            namespace: monitoring
+            wave: "14"
   template:
     metadata:
       name: "{{.name}}"

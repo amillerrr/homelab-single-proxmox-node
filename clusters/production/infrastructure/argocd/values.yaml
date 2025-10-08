@@ -1,0 +1,98 @@
+global:
+  domain: argocd.mill3r.la
+
+# Controller
+controller:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Server
+server:
+  # Expose via LoadBalancer (Cilium will assign IP)
+  service:
+    type: LoadBalancer
+  
+  # Resource limits
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  
+  # Enable insecure mode (no TLS, using Gateway for TLS termination)
+  # Set to false if you want ArgoCD to handle TLS
+  insecure: true
+  
+  # Extra args
+  extraArgs:
+    - --application-namespaces=*
+
+# Repo Server - with Helm support
+repoServer:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  
+  # Enable Helm charts in kustomize
+  env:
+    - name: KUSTOMIZE_PLUGIN_HOME
+      value: /usr/local/bin/kustomize/plugin
+    - name: ARGOCD_EXEC_TIMEOUT
+      value: "180"
+
+# ApplicationSet Controller
+applicationSet:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# Notifications Controller
+notifications:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# Redis
+redis:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+# Dex (SSO) - disabled for homelab simplicity
+dex:
+  enabled: false
+
+# Configs
+configs:
+  # ConfigMap for kustomize options
+  cm:
+    kustomize.buildOptions: "--enable-helm --load-restrictor LoadRestrictionsNone"
+    application.namespaces: "*"
+  
+  # Params
+  params:
+    server.insecure: true
+    application.namespaces: "*"

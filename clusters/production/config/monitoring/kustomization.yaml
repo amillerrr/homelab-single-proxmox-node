@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: monitoring
+
+resources:
+  - grafana-route.yaml
+  - prometheus-route.yaml
+  - alertmanager-route.yaml
+
+commonAnnotations:
+  app.kubernetes.io/part-of: monitoring-stack
+  app.kubernetes.io/managed-by: argocd

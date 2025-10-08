@@ -1,0 +1,43 @@
+---
+# HTTPS Route for Alertmanager - serves actual traffic
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: alertmanager-https
+  namespace: monitoring
+spec:
+  parentRefs:
+    - name: external
+      namespace: gateway
+      sectionName: https-wildcard
+  hostnames:
+    - "alertmanager.mill3r.la"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: kube-prometheus-stack-alertmanager
+          port: 9093
+---
+# HTTP Route for Alertmanager - redirects to HTTPS
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: alertmanager-http-redirect
+  namespace: monitoring
+spec:
+  parentRefs:
+    - name: external
+      namespace: gateway
+      sectionName: http-redirect
+  hostnames:
+    - "alertmanager.mill3r.la"
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301
+
