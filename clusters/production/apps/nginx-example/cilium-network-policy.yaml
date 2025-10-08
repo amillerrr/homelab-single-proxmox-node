@@ -11,6 +11,12 @@ spec:
     matchLabels:
       app: nginx
   ingress:
+    - fromEntities:
+        - host
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
     # Allow from Cilium Gateway (envoy in cilium-agent pods)
     - fromEndpoints:
         - matchLabels:
