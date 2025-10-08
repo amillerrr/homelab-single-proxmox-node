@@ -1,16 +1,15 @@
+---
+# HTTPS Route - serves actual traffic
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: nginx
+  name: nginx-https
   namespace: default
 spec:
   parentRefs:
     - name: external
       namespace: gateway
       sectionName: https-wildcard
-    - name: external
-      namespace: gateway
-      sectionName: http-redirect
   hostnames:
     - "test.mill3r.la"
   rules:
@@ -21,12 +20,23 @@ spec:
       backendRefs:
         - name: nginx
           port: 80
-      parentRefs:
-        - sectionName: https-wildcard
+---
+# HTTP Route - redirects to HTTPS
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: nginx-http-redirect
+  namespace: default
+spec:
+  parentRefs:
+    - name: external
+      namespace: gateway
+      sectionName: http-redirect
+  hostnames:
+    - "test.mill3r.la"
+  rules:
     - filters:
         - type: RequestRedirect
           requestRedirect:
             scheme: https
             statusCode: 301
-      parentRefs:
-        - sectionName: http-redirect

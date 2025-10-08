@@ -4,7 +4,11 @@ metadata:
   name: gateway-certificates-access
   namespace: gateway
 spec:
-  endpointSelector: {}  # Applies to all pods in gateway namespace
+  # Only apply to pods that need certificate access, not ALL pods
+  endpointSelector:
+    matchExpressions:
+      - key: gateway.networking.k8s.io/gateway-name
+        operator: Exists
   ingress:
     # Allow cert-manager webhook to validate certificates
     - fromEndpoints:
@@ -26,3 +30,10 @@ spec:
         - k8sService:
             serviceName: kubernetes
             namespace: default
+    # Allow access to backend services (for gateway to route traffic)
+    - toEndpoints:
+        - {}
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP

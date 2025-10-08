@@ -6,5 +6,5 @@ namespace: default
 resources:
   - nginx-route.yaml
 
-commonLabels:
+commonAnnotations:
   app.kubernetes.io/managed-by: argocd
