@@ -34,10 +34,10 @@ spec:
             path: infrastructure/gateway
             namespace: gateway
             wave: "7"
-          - name: network-policies
-            path: config/network-policies
-            namespace: default
-            wave: "9"
+          # - name: network-policies
+          #   path: config/network-policies
+          #   namespace: default
+          #   wave: "9"
           - name: routes
             path: config/routes
             namespace: default
