@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: monitoring
 
 helmCharts:
-  - name: loki-stack
+  - name: loki
     repo: https://grafana.github.io/helm-charts
     version: 6.42.0
     releaseName: loki-stack
