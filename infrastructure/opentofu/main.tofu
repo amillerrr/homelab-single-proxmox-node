@@ -21,6 +21,8 @@ module "talos_cluster" {
 }
 
 resource "helm_release" "argocd" {
+  provider = helm.talos
+
   depends_on = [module.talos_cluster.kube_config]
 
   name             = "argocd"
@@ -35,13 +37,17 @@ resource "helm_release" "argocd" {
   wait_for_jobs = true
 }
 
-resource "kubernetes_manifest" "applicationset" {
+resource "kubernetes_manifest" "appset_cluster_components" {
+  provider = kubernetes.talos
+
   depends_on = [helm_release.argocd]
 
   manifest = yamldecode(file("${path.root}/../../clusters/production/bootstrap/appset-cluster-components.yaml"))
 }
 
 resource "kubernetes_manifest" "appset_cluster_components_no_prune" {
+  provider = kubernetes.talos
+
   depends_on = [helm_release.argocd]
 
   manifest = yamldecode(file("${path.root}/../../clusters/production/bootstrap/appset-cluster-components-no-prune.yaml"))
