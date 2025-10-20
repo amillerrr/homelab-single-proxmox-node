@@ -39,7 +39,7 @@ spec:
       serviceAccountName: argocd-bootstrap
       securityContext:
         runAsNonRoot: true
-        runAsUser: 65532
+        runAsUser: 65532 # Use non-root user for helm image
         fsGroup: 65532
         seccompProfile:
           type: RuntimeDefault
@@ -55,13 +55,11 @@ spec:
                 matchExpressions:
                   - key: node-role.kubernetes.io/control-plane
                     operator: Exists
-      #
-      # DO NOT ADD hostNetwork: true. This was the original error.
-      # The pod must use cluster DNS to find the API server.
-      #
       containers:
         - name: argocd-bootstrap
-          image: alpine/k8s:1.31.3
+          # --- IMAGE CHANGE ---
+          image: alpine/helm:3.16.1 # Includes helm and kubectl
+          # --- END IMAGE CHANGE ---
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
@@ -89,31 +87,47 @@ spec:
               set -ex
 
               echo "Waiting for API server to be available..."
-              # This check works because we are using in-cluster DNS
               until nslookup kubernetes.default.svc.cluster.local >/dev/null 2>&1; do
                 echo "DNS not ready, waiting..."
                 sleep 5
               done
-              
-              echo "API server is up. Applying ArgoCD..."
-              kubectl apply -k https://github.com/amillerrr/homelab-single-proxmox-node/clusters/production/infrastructure/argocd?ref=main
-              
+
+              echo "API server is up. Adding ArgoCD Helm repo..."
+              helm repo add argo https://argoproj.github.io/argo-helm
+              helm repo update
+
+              echo "Fetching ArgoCD values from GitHub..."
+              # Use curl to get values.yaml from the repo
+              curl -sL https://raw.githubusercontent.com/amillerrr/homelab-single-proxmox-node/main/clusters/production/infrastructure/argocd/values.yaml -o /tmp/argocd-values.yaml
+
+              echo "Installing ArgoCD via Helm..."
+              # --- COMMAND CHANGE ---
+              helm install argocd argo/argo-cd \
+                --version 8.5.10 \
+                --namespace argocd \
+                --create-namespace \
+                -f /tmp/argocd-values.yaml \
+                --wait --timeout 10m
+              # --- END COMMAND CHANGE ---
+
               echo "Waiting for ArgoCD deployments to be ready..."
-              kubectl wait --for=condition=available --timeout=600s \
+              # Helm --wait should handle this, but double-check
+              kubectl wait --for=condition=available --timeout=60s \
                 deployment/argocd-server -n argocd
-              
-              kubectl wait --for=condition=available --timeout=600s \
+
+              kubectl wait --for=condition=available --timeout=60s \
                 deployment/argocd-repo-server -n argocd
 
-              kubectl wait --for=condition=available --timeout=600s \
+              kubectl wait --for=condition=available --timeout=60s \
                 deployment/argocd-applicationset-controller -n argocd
 
               echo "ArgoCD components are ready."
-              
+
               echo "Applying ApplicationSet manifests..."
+              # These can still be applied with kubectl
               kubectl apply -f https://raw.githubusercontent.com/amillerrr/homelab-single-proxmox-node/main/clusters/production/bootstrap/appset-cluster-components.yaml
               kubectl apply -f https://raw.githubusercontent.com/amillerrr/homelab-single-proxmox-node/main/clusters/production/bootstrap/appset-cluster-components-no-prune.yaml
-              
+
               echo "Bootstrap job complete."
       volumes:
         - name: tmp
