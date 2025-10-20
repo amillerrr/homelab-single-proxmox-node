@@ -37,5 +37,12 @@ resource "helm_release" "argocd" {
 
 resource "kubernetes_manifest" "applicationset" {
   depends_on = [helm_release.argocd]
-  manifest = file("${path.root}/../../clusters/production/bootstrap/applicationset.yaml")
+
+  manifest = file("${path.root}/../../clusters/production/bootstrap/appset-cluster-components.yaml")
+}
+
+resource "kubernetes_manifest" "appset_cluster_components_no_prune" {
+  depends_on = [helm_release.argocd]
+
+  manifest = yamldecode(file("${path.root}/../../clusters/production/bootstrap/appset-cluster-components-no-prune.yaml"))
 }
