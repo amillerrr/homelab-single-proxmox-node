@@ -39,7 +39,7 @@ spec:
       serviceAccountName: argocd-bootstrap
       securityContext:
         runAsNonRoot: true
-        runAsUser: 65532 # Use non-root user for helm image
+        runAsUser: 65532
         fsGroup: 65532
         seccompProfile:
           type: RuntimeDefault
@@ -57,9 +57,7 @@ spec:
                     operator: Exists
       containers:
         - name: argocd-bootstrap
-          # --- IMAGE CHANGE ---
-          image: alpine/helm:3.16.1 # Includes helm and kubectl
-          # --- END IMAGE CHANGE ---
+          image: alpine/helm:3.16.1
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
@@ -73,6 +71,15 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
+          # --- ADD ENV VARS ---
+          env:
+            - name: HELM_CONFIG_HOME
+              value: /tmp/.config
+            - name: HELM_CACHE_HOME
+              value: /tmp/.cache
+            - name: HELM_DATA_HOME
+              value: /tmp/.local/share/helm
+          # --- END ENV VARS ---
           resources:
             requests:
               cpu: 100m
@@ -97,21 +104,17 @@ spec:
               helm repo update
 
               echo "Fetching ArgoCD values from GitHub..."
-              # Use curl to get values.yaml from the repo
               curl -sL https://raw.githubusercontent.com/amillerrr/homelab-single-proxmox-node/main/clusters/production/infrastructure/argocd/values.yaml -o /tmp/argocd-values.yaml
 
               echo "Installing ArgoCD via Helm..."
-              # --- COMMAND CHANGE ---
               helm install argocd argo/argo-cd \
                 --version 8.5.10 \
                 --namespace argocd \
                 --create-namespace \
                 -f /tmp/argocd-values.yaml \
                 --wait --timeout 10m
-              # --- END COMMAND CHANGE ---
 
               echo "Waiting for ArgoCD deployments to be ready..."
-              # Helm --wait should handle this, but double-check
               kubectl wait --for=condition=available --timeout=60s \
                 deployment/argocd-server -n argocd
 
@@ -124,7 +127,6 @@ spec:
               echo "ArgoCD components are ready."
 
               echo "Applying ApplicationSet manifests..."
-              # These can still be applied with kubectl
               kubectl apply -f https://raw.githubusercontent.com/amillerrr/homelab-single-proxmox-node/main/clusters/production/bootstrap/appset-cluster-components.yaml
               kubectl apply -f https://raw.githubusercontent.com/amillerrr/homelab-single-proxmox-node/main/clusters/production/bootstrap/appset-cluster-components-no-prune.yaml
 
