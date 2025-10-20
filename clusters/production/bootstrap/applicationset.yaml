@@ -14,47 +14,43 @@ spec:
             path: infrastructure/sealed-secrets
             namespace: sealed-secrets
             wave: "1"
-          - name: cert-manager-rbac
-            path: infrastructure/cert-manager-rbac
-            namespace: kube-system
-            wave: "2"
           - name: cert-manager
             path: infrastructure/cert-manager
             namespace: cert-manager
-            wave: "3"
+            wave: "2"
           - name: cert-manager-config
             path: config/cert-manager
             namespace: cert-manager
-            wave: "5"
+            wave: "3"
           - name: wildcard-certificate
             path: config/certificates
             namespace: gateway
-            wave: "6"
+            wave: "4"
           - name: gateway
             path: infrastructure/gateway
             namespace: gateway
-            wave: "7"
+            wave: "5"
           - name: routes
             path: config/routes
             namespace: default
-            wave: "9"
+            wave: "7"
           - name: nginx-example
             path: apps/nginx-example
             namespace: default
-            wave: "10"
+            wave: "8"
           # Monitoring Stack
           - name: kube-prometheus-stack
             path: infrastructure/monitoring/prometheus
             namespace: monitoring
-            wave: "11"
+            wave: "9"
           - name: loki-stack
             path: infrastructure/monitoring/loki
             namespace: monitoring
-            wave: "12"
+            wave: "10"
           - name: monitoring-routes
             path: config/monitoring
             namespace: monitoring
-            wave: "13"
+            wave: "11"
   template:
     metadata:
       name: "{{.name}}"
@@ -111,7 +107,7 @@ spec:
           - name: cilium-config
             path: platform/cilium
             namespace: kube-system
-            wave: "8"
+            wave: "6"
   template:
     metadata:
       name: "{{.name}}"

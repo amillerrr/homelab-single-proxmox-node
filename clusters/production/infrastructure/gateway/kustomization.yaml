@@ -5,7 +5,6 @@ namespace: gateway
 
 resources:
   - gateway-class.yaml
-  - gateway-internal.yaml
   - gateway-external.yaml
 
 commonAnnotations:

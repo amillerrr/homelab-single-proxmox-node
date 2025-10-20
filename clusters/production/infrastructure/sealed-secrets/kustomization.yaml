@@ -3,9 +3,6 @@ kind: Kustomization
 
 namespace: sealed-secrets
 
-resources:
-  - sealedsecret-crd.yaml
-
 helmCharts:
   - name: sealed-secrets
     repo: https://bitnami-labs.github.io/sealed-secrets

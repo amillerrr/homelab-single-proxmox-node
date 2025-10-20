@@ -19,3 +19,23 @@ module "talos_cluster" {
   cluster = var.talos_cluster_config
   nodes = var.talos_nodes
 }
+
+resource "helm_release" "argocd" {
+  depends_on = [module.talos_cluster.kube_config]
+
+  name             = "argocd"
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argo-cd"
+  version          = "8.5.10" # From your argocd/values.yaml
+  namespace        = "argocd"
+  create_namespace = true
+  values = [
+    file("${path.root}/clusters/production/infrastructure/argocd/values.yaml")
+  ]
+  wait_for_jobs = true
+}
+
+resource "kubernetes_manifest" "applicationset" {
+  depends_on = [helm_release.argocd]
+  manifest = file("${path.root}/clusters/production/bootstrap/applicationset.yaml")
+}

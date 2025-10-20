@@ -26,6 +26,10 @@ terraform {
       source  = "hashicorp/local"
       version = "~> 2.4"
     }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "3.0.2"
+    }
   }
 }
 
@@ -47,4 +51,13 @@ provider "kubernetes" {
   client_certificate = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.client_certificate)
   client_key = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.client_key)
   cluster_ca_certificate = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.ca_certificate)
+}
+
+provider "helm" {
+  kubernetes = {
+    host                   = module.talos_cluster.kube_config.kubernetes_client_configuration.host
+    client_certificate     = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.client_certificate)
+    client_key             = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.client_key)
+    cluster_ca_certificate = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.ca_certificate)
+  }
 }
