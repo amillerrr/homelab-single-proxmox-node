@@ -30,12 +30,12 @@ resource "helm_release" "argocd" {
   namespace        = "argocd"
   create_namespace = true
   values = [
-    file("${path.root}/clusters/production/infrastructure/argocd/values.yaml")
+    file("${path.root}/../../clusters/production/infrastructure/argocd/values.yaml")
   ]
   wait_for_jobs = true
 }
 
 resource "kubernetes_manifest" "applicationset" {
   depends_on = [helm_release.argocd]
-  manifest = file("${path.root}/clusters/production/bootstrap/applicationset.yaml")
+  manifest = file("${path.root}/../../clusters/production/bootstrap/applicationset.yaml")
 }
