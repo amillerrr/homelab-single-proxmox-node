@@ -9,10 +9,6 @@ locals {
   ])
 }
 
-resource "talos_machine_secrets" "this" {
-  // Changing talos_version causes trouble as new certs are created
-}
-
 data "talos_client_configuration" "this" {
   cluster_name         = var.cluster.name
   client_configuration = talos_machine_secrets.this.client_configuration
@@ -41,6 +37,10 @@ resource "terraform_data" "inline_manifests" {
     {
       name     = "cilium-bootstrap"
       contents = file("${path.module}/inline-manifests/cilium-install.yaml")
+    },
+    {
+      name     = "argocd-bootstrap"
+      contents = file("${path.module}/inline-manifests/argocd-install.yaml")
     }
   ]
 }
@@ -50,7 +50,7 @@ data "talos_machine_configuration" "this" {
   cluster_name = var.cluster.name
   # This is the Kubernetes API Server endpoint.
   # ref - https://www.talos.dev/latest/introduction/prodnotes/#decide-the-kubernetes-endpoint
-  cluster_endpoint = "https://${local.kubernetes_endpoint}:6443"
+  cluster_endpoint = "https://://${local.kubernetes_endpoint}:6443"
   # @formatter:off
   talos_version = var.cluster.talos_machine_config_version != null ? var.cluster.talos_machine_config_version : (each.value.update == true ? var.image.update_version : var.image.version)
   # @formatter:on

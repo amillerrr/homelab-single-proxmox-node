@@ -10,10 +10,6 @@ terraform {
       source = "siderolabs/talos"
       version = "0.9.0"
     }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "2.38.0"
-    }
     null = {
       source  = "hashicorp/null"
       version = "~> 3.2"
@@ -25,10 +21,6 @@ terraform {
     local = {
       source  = "hashicorp/local"
       version = "~> 2.4"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "3.0.2"
     }
   }
 }
@@ -43,27 +35,5 @@ provider "proxmox" {
     agent = false
     username = var.proxmox.username
     private_key = file("~/.ssh/proxmox")
-  }
-}
-
-provider "kubernetes" {}
-
-provider "kubernetes" {
-  alias = "talos"
-  host = module.talos_cluster.kube_config.kubernetes_client_configuration.host
-  client_certificate = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.client_certificate)
-  client_key = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.client_key)
-  cluster_ca_certificate = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.ca_certificate)
-}
-
-provider "helm" {}
-
-provider "helm" {
-  alias = "talos"
-  kubernetes = {
-    host                   = module.talos_cluster.kube_config.kubernetes_client_configuration.host
-    client_certificate     = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.client_certificate)
-    client_key             = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.client_key)
-    cluster_ca_certificate = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.ca_certificate)
   }
 }

@@ -1,0 +1,120 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argocd-bootstrap
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: argocd-bootstrap
+    namespace: argocd
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argocd-bootstrap
+  namespace: argocd
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: argocd-bootstrap
+  namespace: argocd
+spec:
+  backoffLimit: 10
+  template:
+    metadata:
+      labels:
+        app: argocd-bootstrap
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: argocd-bootstrap
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      tolerations:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: node-role.kubernetes.io/control-plane
+                    operator: Exists
+      #
+      # DO NOT ADD hostNetwork: true. This was the original error.
+      # The pod must use cluster DNS to find the API server.
+      #
+      containers:
+        - name: argocd-bootstrap
+          image: alpine/k8s:1.31.3
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65532
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          command:
+            - sh
+            - -c
+            - |
+              set -ex
+
+              echo "Waiting for API server to be available..."
+              # This check works because we are using in-cluster DNS
+              until nslookup kubernetes.default.svc.cluster.local >/dev/null 2>&1; do
+                echo "DNS not ready, waiting..."
+                sleep 5
+              done
+              
+              echo "API server is up. Applying ArgoCD..."
+              kubectl apply -k https://github.com/amillerrr/homelab-single-proxmox-node/clusters/production/infrastructure/argocd?ref=main
+              
+              echo "Waiting for ArgoCD deployments to be ready..."
+              kubectl wait --for=condition=available --timeout=600s \
+                deployment/argocd-server -n argocd
+              
+              kubectl wait --for=condition=available --timeout=600s \
+                deployment/argocd-repo-server -n argocd
+
+              kubectl wait --for=condition=available --timeout=600s \
+                deployment/argocd-applicationset-controller -n argocd
+
+              echo "ArgoCD components are ready."
+              
+              echo "Applying ApplicationSet manifests..."
+              kubectl apply -f https://raw.githubusercontent.com/amillerrr/homelab-single-proxmox-node/main/clusters/production/bootstrap/appset-cluster-components.yaml
+              kubectl apply -f https://raw.githubusercontent.com/amillerrr/homelab-single-proxmox-node/main/clusters/production/bootstrap/appset-cluster-components-no-prune.yaml
+              
+              echo "Bootstrap job complete."
+      volumes:
+        - name: tmp
+          emptyDir: {}
