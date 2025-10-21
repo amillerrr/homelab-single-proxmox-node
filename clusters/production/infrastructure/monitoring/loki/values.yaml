@@ -1,55 +1,56 @@
 # Loki Configuration
+# Top-level settings for the loki chart
 loki:
   enabled: true
-  
   # Use simple scalable mode for homelab
   deploymentMode: SingleBinary
-  
-  loki:
-    # Authentication disabled for homelab simplicity
-    auth_enabled: false
-    
-    # Common config
-    commonConfig:
-      replication_factor: 1
-      path_prefix: /var/loki
-    
-    # Storage config
-    storage:
-      type: 'filesystem'
-      filesystem:
-        chunks_directory: /var/loki/chunks
-        rules_directory: /var/loki/rules
-      bucketNames:
-        chunks: ""
-        ruler: ""
-        admin: ""
-    
-    # Schema config
-    schemaConfig:
-      configs:
-        - from: 2024-01-01
-          store: tsdb
-          object_store: filesystem
-          schema: v13
-          index:
-            prefix: index_
-            period: 24h
-    
-    # Limits
-    limits_config:
-      retention_period: 168h  # 7 days
-      enforce_metric_name: false
-      reject_old_samples: true
-      reject_old_samples_max_age: 168h
-      max_cache_freshness_per_query: 10m
-      split_queries_by_interval: 15m
-      max_query_parallelism: 32
-  
-  # Single binary deployment
+
+  # Authentication disabled for homelab simplicity
+  auth_enabled: false
+
+  # Common config (Applies to multiple components if not single binary)
+  commonConfig:
+    replication_factor: 1
+    path_prefix: /var/loki
+
+  # Storage config
+  storage:
+    type: 'filesystem' # You are using filesystem
+    filesystem:
+      chunks_directory: /var/loki/chunks
+      rules_directory: /var/loki/rules
+    # Provide empty bucketNames even though using filesystem
+    # to satisfy the chart template
+    bucketNames:
+      chunks: ""
+      ruler: ""
+      admin: ""
+
+  # Schema config
+  schemaConfig:
+    configs:
+      - from: 2024-01-01
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
+
+  # Limits
+  limits_config:
+    retention_period: 168h  # 7 days
+    enforce_metric_name: false
+    reject_old_samples: true
+    reject_old_samples_max_age: 168h
+    max_cache_freshness_per_query: 10m
+    split_queries_by_interval: 15m
+    max_query_parallelism: 32
+
+  # Single binary deployment config (goes under top-level 'loki:')
   singleBinary:
     replicas: 1
-    
+
     # Resources
     resources:
       requests:
@@ -58,34 +59,34 @@ loki:
       limits:
         cpu: 500m
         memory: 1Gi
-    
+
     # Persistence
     persistence:
       enabled: true
       size: 10Gi
-      storageClass: local-lvm
-    
+      storageClass: local-lvm # Make sure this StorageClass exists
+
     # Security context
     securityContext:
       runAsNonRoot: true
       runAsUser: 10001
       fsGroup: 10001
       readOnlyRootFilesystem: true
-    
+
     # Extra volumes for tmp
     extraVolumes:
       - name: tmp
         emptyDir: {}
-    
+
     extraVolumeMounts:
       - name: tmp
         mountPath: /tmp
-  
-  # Gateway (nginx) for Loki
+
+  # Gateway (nginx) for Loki (goes under top-level 'loki:')
   gateway:
     enabled: true
     replicas: 1
-    
+
     resources:
       requests:
         cpu: 50m
@@ -93,23 +94,25 @@ loki:
       limits:
         cpu: 100m
         memory: 128Mi
-    
+
     service:
       type: ClusterIP
       port: 80
 
-# Promtail Configuration (Log collector)
+# Promtail Configuration (Log collector) - Stays at the top level
 promtail:
   enabled: true
-  
+
   config:
     # Scrape logs from all pods
     clients:
-      - url: http://loki-stack-gateway/loki/api/v1/push
-    
+      # Use the correct service name created by the loki chart (often includes release name)
+      - url: http://loki-stack-gateway.monitoring.svc:80/loki/api/v1/push
+      # Verify this service name exists: kubectl get svc -n monitoring loki-stack-gateway
+
     positions:
       filename: /tmp/positions.yaml
-    
+
     scrape_configs:
       # Kubernetes pods
       - job_name: kubernetes-pods
@@ -130,20 +133,20 @@ promtail:
           # Add node name label
           - source_labels: [__meta_kubernetes_pod_node_name]
             target_label: node
-      
-      # Systemd journals
-      - job_name: journal
-        journal:
-          path: /var/log/journal
-          max_age: 12h
-          labels:
-            job: systemd-journal
-        relabel_configs:
-          - source_labels: ['__journal__systemd_unit']
-            target_label: 'unit'
-          - source_labels: ['__journal__hostname']
-            target_label: 'hostname'
-  
+
+      # Systemd journals (If running Promtail outside Kubernetes as well)
+      # - job_name: journal
+      #   journal:
+      #     path: /var/log/journal
+      #     max_age: 12h
+      #     labels:
+      #       job: systemd-journal
+      #   relabel_configs:
+      #     - source_labels: ['__journal__systemd_unit']
+      #       target_label: 'unit'
+      #     - source_labels: ['__journal__hostname']
+      #       target_label: 'hostname'
+
   # Resources
   resources:
     requests:
@@ -152,24 +155,39 @@ promtail:
     limits:
       cpu: 200m
       memory: 128Mi
-  
-  # Security context
+
+  # Security context needs root to read host logs/pod logs
   securityContext:
-    runAsUser: 0  # Required for reading logs
+    runAsUser: 0
     runAsGroup: 0
-    readOnlyRootFilesystem: true
-  
-  # Extra volumes
+    readOnlyRootFilesystem: true # Still good practice
+
+  # Extra volumes for logs
+  # Ensure these paths are correct for Talos and container runtime
   extraVolumes:
-    - name: journal
+    - name: logs
       hostPath:
-        path: /var/log/journal
-  
+        path: /var/log/pods # Check if this is the correct path for Talos/containerd logs
+    - name: containerruntimesock
+      hostPath:
+        path: /run/containerd/containerd.sock # Check if this is the correct socket path
+    # Optional: If you need journal logs from host
+    # - name: journal
+    #   hostPath:
+    #     path: /var/log/journal
+
   extraVolumeMounts:
-    - name: journal
-      mountPath: /var/log/journal
+    - name: logs
+      mountPath: /var/log/pods
       readOnly: true
-  
+    - name: containerruntimesock
+      mountPath: /run/containerd/containerd.sock
+      readOnly: true
+    # Optional: If you need journal logs from host
+    # - name: journal
+    #   mountPath: /var/log/journal
+    #   readOnly: true
+
   # Tolerations to run on all nodes
   tolerations:
     - effect: NoSchedule
@@ -179,7 +197,7 @@ promtail:
 grafana:
   enabled: false
 
-# Prometheus integration
+# Prometheus integration (keep enabled if you want Loki metrics in Prometheus)
 prometheus:
   enabled: true
 
@@ -187,6 +205,6 @@ prometheus:
 fluent-bit:
   enabled: false
 
-# Log Gateway (disabled, using Loki's gateway)
+# Loki Canary (disabled)
 loki-canary:
   enabled: false
