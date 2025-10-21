@@ -1,39 +1,36 @@
-# Top-level settings for the loki chart
+# Use simpler values, relying on chart defaults for SingleBinary
 loki:
+  # Keep auth disabled and deployment mode
   enabled: true
-  # Use simple scalable mode for homelab
   deploymentMode: SingleBinary
-
-  # Authentication disabled for homelab simplicity
   auth_enabled: false
 
-  # Common config (Applies to multiple components if not single binary)
+  # Minimal commonConfig for filesystem path
   commonConfig:
-    replication_factor: 1
     path_prefix: /var/loki
+    replication_factor: 1 # Still required
 
-  # Storage config - Minimal for filesystem
+  # Minimal storage config for filesystem
   storage:
     type: 'filesystem'
     filesystem:
       chunks_directory: /var/loki/chunks
       rules_directory: /var/loki/rules
-    # DO NOT add bucketNames for filesystem storage
 
-  # Schema config
+  # Schema config remains the same
   schemaConfig:
     configs:
       - from: 2024-01-01
         store: tsdb
-        object_store: filesystem # Important for filesystem
+        object_store: filesystem
         schema: v13
         index:
           prefix: index_
           period: 24h
 
-  # Limits
+  # Limits remain the same
   limits_config:
-    retention_period: 168h  # 7 days
+    retention_period: 168h
     enforce_metric_name: false
     reject_old_samples: true
     reject_old_samples_max_age: 168h
@@ -41,10 +38,13 @@ loki:
     split_queries_by_interval: 15m
     max_query_parallelism: 32
 
-  # Single binary deployment config (goes under top-level 'loki:')
+  # Keep singleBinary persistence and resource settings
   singleBinary:
     replicas: 1
-    # Resources
+    persistence:
+      enabled: true
+      size: 10Gi
+      storageClass: local-lvm # Ensure this exists
     resources:
       requests:
         cpu: 100m
@@ -52,18 +52,11 @@ loki:
       limits:
         cpu: 500m
         memory: 1Gi
-    # Persistence
-    persistence:
-      enabled: true
-      size: 10Gi
-      storageClass: local-lvm # Ensure this StorageClass exists
-    # Security context
     securityContext:
       runAsNonRoot: true
       runAsUser: 10001
       fsGroup: 10001
       readOnlyRootFilesystem: true
-    # Extra volumes for tmp
     extraVolumes:
       - name: tmp
         emptyDir: {}
@@ -71,7 +64,7 @@ loki:
       - name: tmp
         mountPath: /tmp
 
-  # Gateway (nginx) for Loki (goes under top-level 'loki:')
+  # Gateway remains enabled
   gateway:
     enabled: true
     replicas: 1
@@ -86,44 +79,14 @@ loki:
       type: ClusterIP
       port: 80
 
-  # Add explicit storage_config for filesystem schema shipper
-  # Sometimes required even with common.storage for singleBinary validation
-  storage_config:
-    boltdb_shipper:
-      active_index_directory: /var/loki/index # Adjusted path
-      cache_location: /var/loki/boltdb-cache # Adjusted path
-      shared_store: filesystem # Explicitly state filesystem here too
-    filesystem:
-      directory: /var/loki/chunks
+  # REMOVED explicit storage_config block
+  # REMOVED explicit disables for read/write/backend etc.
 
-  # Explicitly disable scalable components to potentially satisfy validation
-  read:
-    replicas: 0
-  write:
-    replicas: 0
-  backend:
-    replicas: 0
-  querier:
-    enabled: false
-  queryFrontend:
-    enabled: false
-  ingester:
-    enabled: false
-  distributor:
-    enabled: false
-  compactor:
-    enabled: false
-  indexGateway:
-    enabled: false
-  ruler:
-    enabled: false
-
-# Promtail Configuration (Log collector) - Stays at the top level
+# Promtail configuration remains mostly the same
 promtail:
   enabled: true
   config:
     clients:
-      # Use the correct service name created by the loki chart (often includes release name)
       - url: http://loki-stack-gateway.monitoring.svc:80/loki/api/v1/push
     positions:
       filename: /tmp/positions.yaml
@@ -156,10 +119,10 @@ promtail:
   extraVolumes:
     - name: logs
       hostPath:
-        path: /var/log/pods # Verify path for Talos/containerd logs
+        path: /var/log/pods # Verify path
     - name: containerruntimesock
       hostPath:
-        path: /run/containerd/containerd.sock # Verify socket path
+        path: /run/containerd/containerd.sock # Verify path
   extraVolumeMounts:
     - name: logs
       mountPath: /var/log/pods
@@ -171,24 +134,15 @@ promtail:
     - effect: NoSchedule
       operator: Exists
 
-# Grafana integration (disabled)
+# Keep other top-level settings disabled
 grafana:
   enabled: false
-
-# Prometheus integration (enabled)
 prometheus:
-  enabled: true
-
-# Fluent Bit (disabled)
+  enabled: true # Keep enabled for metrics
 fluent-bit:
   enabled: false
-
-# Loki Canary (disabled)
 loki-canary:
   enabled: false
-
-# --- Explicitly disable chunks/results cache ---
-# These might pull in dependencies expecting object storage if left to default
 chunksCache:
   enabled: false
 resultsCache:
