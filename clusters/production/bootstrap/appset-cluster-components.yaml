@@ -41,20 +41,20 @@ spec:
           - name: nginx-example
             path: apps/nginx-example
             namespace: default
-            wave: "10"
+            wave: "11"
           # Monitoring Stack
           - name: kube-prometheus-stack
             path: infrastructure/monitoring/prometheus
             namespace: monitoring
-            wave: "11"
+            wave: "12"
           - name: loki-stack
             path: infrastructure/monitoring/loki
             namespace: monitoring
-            wave: "12"
+            wave: "13"
           - name: monitoring-routes
             path: config/monitoring
             namespace: monitoring
-            wave: "13"
+            wave: "14"
   template:
     metadata:
       name: "{{.name}}"
