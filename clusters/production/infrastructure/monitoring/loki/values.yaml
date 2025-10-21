@@ -1,4 +1,3 @@
-# Loki Configuration
 # Top-level settings for the loki chart
 loki:
   enabled: true
@@ -13,19 +12,20 @@ loki:
     replication_factor: 1
     path_prefix: /var/loki
 
-  # Storage config
+  # Storage config - Minimal for filesystem
   storage:
-    type: 'filesystem' # You are using filesystem
+    type: 'filesystem'
     filesystem:
       chunks_directory: /var/loki/chunks
       rules_directory: /var/loki/rules
+    # DO NOT add bucketNames for filesystem storage
 
   # Schema config
   schemaConfig:
     configs:
       - from: 2024-01-01
         store: tsdb
-        object_store: filesystem
+        object_store: filesystem # Important for filesystem
         schema: v13
         index:
           prefix: index_
@@ -44,7 +44,6 @@ loki:
   # Single binary deployment config (goes under top-level 'loki:')
   singleBinary:
     replicas: 1
-
     # Resources
     resources:
       requests:
@@ -53,25 +52,21 @@ loki:
       limits:
         cpu: 500m
         memory: 1Gi
-
     # Persistence
     persistence:
       enabled: true
       size: 10Gi
-      storageClass: local-lvm # Make sure this StorageClass exists
-
+      storageClass: local-lvm # Ensure this StorageClass exists
     # Security context
     securityContext:
       runAsNonRoot: true
       runAsUser: 10001
       fsGroup: 10001
       readOnlyRootFilesystem: true
-
     # Extra volumes for tmp
     extraVolumes:
       - name: tmp
         emptyDir: {}
-
     extraVolumeMounts:
       - name: tmp
         mountPath: /tmp
@@ -80,7 +75,6 @@ loki:
   gateway:
     enabled: true
     replicas: 1
-
     resources:
       requests:
         cpu: 50m
@@ -88,68 +82,66 @@ loki:
       limits:
         cpu: 100m
         memory: 128Mi
-
     service:
       type: ClusterIP
       port: 80
 
-# Explicitly disable scalable components to satisfy validation
-read:
-  enabled: false
-write:
-  enabled: false
-backend:
-  enabled: false
+  # Add explicit storage_config for filesystem schema shipper
+  # Sometimes required even with common.storage for singleBinary validation
+  storage_config:
+    boltdb_shipper:
+      active_index_directory: /var/loki/index # Adjusted path
+      cache_location: /var/loki/boltdb-cache # Adjusted path
+      shared_store: filesystem # Explicitly state filesystem here too
+    filesystem:
+      directory: /var/loki/chunks
+
+  # Explicitly disable scalable components to potentially satisfy validation
+  read:
+    replicas: 0
+  write:
+    replicas: 0
+  backend:
+    replicas: 0
+  querier:
+    enabled: false
+  queryFrontend:
+    enabled: false
+  ingester:
+    enabled: false
+  distributor:
+    enabled: false
+  compactor:
+    enabled: false
+  indexGateway:
+    enabled: false
+  ruler:
+    enabled: false
 
 # Promtail Configuration (Log collector) - Stays at the top level
 promtail:
   enabled: true
-
   config:
-    # Scrape logs from all pods
     clients:
       # Use the correct service name created by the loki chart (often includes release name)
       - url: http://loki-stack-gateway.monitoring.svc:80/loki/api/v1/push
-      # Verify this service name exists: kubectl get svc -n monitoring loki-stack-gateway
-
     positions:
       filename: /tmp/positions.yaml
-
     scrape_configs:
-      # Kubernetes pods
       - job_name: kubernetes-pods
         pipeline_stages:
           - cri: {}
         kubernetes_sd_configs:
           - role: pod
         relabel_configs:
-          # Add namespace label
           - source_labels: [__meta_kubernetes_pod_namespace]
             target_label: namespace
-          # Add pod name label
           - source_labels: [__meta_kubernetes_pod_name]
             target_label: pod
-          # Add container name label
           - source_labels: [__meta_kubernetes_pod_container_name]
             target_label: container
-          # Add node name label
           - source_labels: [__meta_kubernetes_pod_node_name]
             target_label: node
-
-      # Systemd journals (If running Promtail outside Kubernetes as well)
-      # - job_name: journal
-      #   journal:
-      #     path: /var/log/journal
-      #     max_age: 12h
-      #     labels:
-      #       job: systemd-journal
-      #   relabel_configs:
-      #     - source_labels: ['__journal__systemd_unit']
-      #       target_label: 'unit'
-      #     - source_labels: ['__journal__hostname']
-      #       target_label: 'hostname'
-
-  # Resources
   resources:
     requests:
       cpu: 50m
@@ -157,27 +149,17 @@ promtail:
     limits:
       cpu: 200m
       memory: 128Mi
-
-  # Security context needs root to read host logs/pod logs
   securityContext:
     runAsUser: 0
     runAsGroup: 0
-    readOnlyRootFilesystem: true # Still good practice
-
-  # Extra volumes for logs
-  # Ensure these paths are correct for Talos and container runtime
+    readOnlyRootFilesystem: true
   extraVolumes:
     - name: logs
       hostPath:
-        path: /var/log/pods # Check if this is the correct path for Talos/containerd logs
+        path: /var/log/pods # Verify path for Talos/containerd logs
     - name: containerruntimesock
       hostPath:
-        path: /run/containerd/containerd.sock # Check if this is the correct socket path
-    # Optional: If you need journal logs from host
-    # - name: journal
-    #   hostPath:
-    #     path: /var/log/journal
-
+        path: /run/containerd/containerd.sock # Verify socket path
   extraVolumeMounts:
     - name: logs
       mountPath: /var/log/pods
@@ -185,28 +167,29 @@ promtail:
     - name: containerruntimesock
       mountPath: /run/containerd/containerd.sock
       readOnly: true
-    # Optional: If you need journal logs from host
-    # - name: journal
-    #   mountPath: /var/log/journal
-    #   readOnly: true
-
-  # Tolerations to run on all nodes
   tolerations:
     - effect: NoSchedule
       operator: Exists
 
-# Grafana integration (disabled since we're using kube-prometheus-stack's Grafana)
+# Grafana integration (disabled)
 grafana:
   enabled: false
 
-# Prometheus integration (keep enabled if you want Loki metrics in Prometheus)
+# Prometheus integration (enabled)
 prometheus:
   enabled: true
 
-# Fluent Bit (alternative to Promtail, disabled by default)
+# Fluent Bit (disabled)
 fluent-bit:
   enabled: false
 
 # Loki Canary (disabled)
 loki-canary:
+  enabled: false
+
+# --- Explicitly disable chunks/results cache ---
+# These might pull in dependencies expecting object storage if left to default
+chunksCache:
+  enabled: false
+resultsCache:
   enabled: false
