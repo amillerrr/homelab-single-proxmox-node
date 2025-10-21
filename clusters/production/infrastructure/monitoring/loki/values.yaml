@@ -19,12 +19,6 @@ loki:
     filesystem:
       chunks_directory: /var/loki/chunks
       rules_directory: /var/loki/rules
-    # Provide empty bucketNames even though using filesystem
-    # to satisfy the chart template
-    bucketNames:
-      chunks: ""
-      ruler: ""
-      admin: ""
 
   # Schema config
   schemaConfig:
