@@ -93,6 +93,13 @@ loki:
       type: ClusterIP
       port: 80
 
+# Explicitly disable scalable components to satisfy validation
+read:
+  replicas: 0
+write:
+  replicas: 0
+backend:
+  replicas: 0
 # Promtail Configuration (Log collector) - Stays at the top level
 promtail:
   enabled: true
