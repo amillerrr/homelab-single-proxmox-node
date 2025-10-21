@@ -95,11 +95,12 @@ loki:
 
 # Explicitly disable scalable components to satisfy validation
 read:
-  replicas: 0
+  enabled: false
 write:
-  replicas: 0
+  enabled: false
 backend:
-  replicas: 0
+  enabled: false
+
 # Promtail Configuration (Log collector) - Stays at the top level
 promtail:
   enabled: true
