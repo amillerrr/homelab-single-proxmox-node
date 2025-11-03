@@ -14,9 +14,9 @@ spec:
             path: infrastructure/sealed-secrets
             namespace: sealed-secrets
             wave: "1"
-          - name: cert-manager-rbac # <-- ADD THIS BACK
-            path: infrastructure/cert-manager-rbac # <-- ADD THIS BACK
-            namespace: kube-system # <-- ADD THIS BACK
+          - name: cert-manager-rbac
+            path: infrastructure/cert-manager-rbac
+            namespace: kube-system
             wave: "2"
           - name: cert-manager
             path: infrastructure/cert-manager
@@ -43,32 +43,57 @@ spec:
             namespace: default
             wave: "11"
           # Monitoring Stack
+          - name: kube-prometheus-stack-crds # Added separate CRD app
+            path: infrastructure/monitoring/prometheus # Path points to kustomization including crds-app.yaml
+            namespace: argocd # CRD app object lives here
+            wave: "10" # ApplicationSet wave for CRD App
           - name: kube-prometheus-stack
             path: infrastructure/monitoring/prometheus
             namespace: monitoring
-            wave: "12"
+            wave: "12" # Runs after CRDs app (wave 10)
           - name: loki-stack
-            path: infrastructure/monitoring/loki
+            # --- Source changed to Helm ---
+            chart: loki
+            repoURL: https://grafana.github.io/helm-charts
+            targetRevision: 5.41.0 # Use the downgraded version
+            helm:
+              releaseName: loki-stack
+              valuesFiles:
+                # Reference values file relative to repo root
+                - clusters/production/infrastructure/monitoring/loki/values.yaml
+            # --- End Helm source ---
             namespace: monitoring
-            wave: "13"
+            wave: "13" # Runs after Prometheus
           - name: monitoring-routes
             path: config/monitoring
             namespace: monitoring
-            wave: "14"
+            wave: "14" # Runs last
   template:
     metadata:
       name: "{{.name}}"
       namespace: argocd
       annotations:
-        argocd.argoproj.io/sync-wave: "{{.wave}}"
+        # Use ApplicationSet wave unless it's one of the Prometheus apps
+        argocd.argoproj.io/sync-wave: "{{ if eq .name \"kube-prometheus-stack-crds\" }}10{{ else if eq .name \"kube-prometheus-stack\" }}12{{ else }}{{.wave}}{{ end }}"
       finalizers:
         - resources-finalizer.argocd.argoproj.io
     spec:
       project: default
+      # Corrected Source definition with alternative Go template structure
       source:
-        repoURL: https://github.com/amillerrr/homelab-single-proxmox-node.git
-        targetRevision: main
+        repoURL: https://github.com/amillerrr/homelab-single-proxmox-node.git # Common repoURL
+        targetRevision: main # Common targetRevision
+        {{- if .path }} # If path is defined, add path key
         path: "clusters/production/{{.path}}"
+        {{- else }} # Otherwise, add chart and helm keys
+        chart: "{{.chart}}"
+        helm:
+          releaseName: "{{.helm.releaseName}}"
+          valuesFiles: # Start the YAML list
+          {{- range .helm.valuesFiles }}
+            - {{ . }} # Add each item as a list element
+          {{- end }}
+        {{- end }}
       destination:
         server: https://kubernetes.default.svc
         namespace: "{{.namespace}}"
