@@ -126,6 +126,10 @@ spec:
 
               echo "ArgoCD components are ready."
 
+              echo "Waiting for ApplicationSet CRD to be established..."
+              kubectl wait --for condition=established --timeout=60s \
+                crd/applicationsets.argoproj.io
+
               echo "Applying ApplicationSet manifests..."
               kubectl apply -f https://raw.githubusercontent.com/amillerrr/homelab-single-proxmox-node/main/clusters/production/bootstrap/appset-cluster-components.yaml
               kubectl apply -f https://raw.githubusercontent.com/amillerrr/homelab-single-proxmox-node/main/clusters/production/bootstrap/appset-cluster-components-no-prune.yaml
