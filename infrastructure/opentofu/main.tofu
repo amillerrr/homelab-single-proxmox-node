@@ -20,3 +20,39 @@ module "talos_cluster" {
   nodes = var.talos_nodes
 }
 
+resource "helm_release" "argocd" {
+  provider = helm.talos # <-- Use aliased provider
+
+  # Depend on the *entire module* to ensure cluster is ready
+  depends_on = [module.talos_cluster]
+
+  name             = "argocd"
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argo-cd"
+  version          = "8.5.10" # From your old job
+  namespace        = "argocd"
+  create_namespace = true
+
+  values = [
+    # Use relative path from this file
+    file("${path.root}/../../clusters/production/infrastructure/argocd/values.yaml")
+  ]
+
+  # v3 provider defaults to wait=true
+  wait_for_jobs = true
+}
+
+resource "kubernetes_manifest" "appset_cluster_components" {
+  provider = kubernetes.talos # <-- Use aliased provider
+
+  # Depend on the Helm release being finished
+  depends_on = [helm_release.argocd]
+  manifest   = yamldecode(file("${path.root}/../../clusters/production/bootstrap/appset-cluster-components.yaml"))
+}
+
+resource "kubernetes_manifest" "appset_no_prune" {
+  provider = kubernetes.talos # <-- Use aliased provider
+
+  depends_on = [helm_release.argocd]
+  manifest   = yamldecode(file("${path.root}/../../clusters/production/bootstrap/appset-cluster-components-no-prune.yaml"))
+}

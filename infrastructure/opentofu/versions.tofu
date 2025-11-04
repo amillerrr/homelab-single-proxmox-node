@@ -10,6 +10,14 @@ terraform {
       source = "siderolabs/talos"
       version = "0.9.0"
     }
+    kubernetes = {
+      source = "hashicorp/kubernetes"
+      version = "2.38.0"
+    }
+    helm = {
+      source = "hashicorp/helm"
+      version = "~> 3.0"
+    }
     null = {
       source  = "hashicorp/null"
       version = "~> 3.2"
@@ -35,5 +43,29 @@ provider "proxmox" {
     agent = false
     username = var.proxmox.username
     private_key = file("~/.ssh/proxmox")
+  }
+}
+
+# Add empty default providers. This satisfies Tofu's initial plan check.
+provider "kubernetes" {}
+provider "helm" {}
+
+# This is your aliased provider that gets credentials *after* the module runs.
+provider "kubernetes" {
+  alias                  = "talos"
+  host                   = module.talos_cluster.kube_config.kubernetes_client_configuration.host
+  client_certificate     = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.client_certificate)
+  client_key             = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.client_key)
+  cluster_ca_certificate = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.ca_certificate)
+}
+
+# This is the aliased Helm provider.
+provider "helm" {
+  alias = "talos"
+  kubernetes = {
+    host                   = module.talos_cluster.kube_config.kubernetes_client_configuration.host
+    client_certificate     = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.client_certificate)
+    client_key             = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.client_key)
+    cluster_ca_certificate = base64decode(module.talos_cluster.kube_config.kubernetes_client_configuration.ca_certificate)
   }
 }
