@@ -79,8 +79,34 @@ loki:
       type: ClusterIP
       port: 80
 
-  # REMOVED explicit storage_config block
-  # REMOVED explicit disables for read/write/backend etc.
+  storage_config:
+    boltdb_shipper:
+      active_index_directory: /var/loki/index
+      cache_location: /var/loki/boltdb-cache
+      shared_store: filesystem
+    filesystem:
+      directory: /var/loki/chunks
+
+  read:
+    replicas: 0
+  write:
+    replicas: 0
+  backend:
+    replicas: 0
+  querier:
+    enabled: false
+  queryFrontend:
+    enabled: false
+  ingester:
+    enabled: false
+  distributor:
+    enabled: false
+  compactor:
+    enabled: false
+  indexGateway:
+    enabled: false
+  ruler:
+    enabled: false
 
 # Promtail configuration remains mostly the same
 promtail:
