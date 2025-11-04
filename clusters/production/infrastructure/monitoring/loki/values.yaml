@@ -1,23 +1,15 @@
-# Use simpler values, relying on chart defaults for SingleBinary
 loki:
-  # Keep auth disabled and deployment mode
   enabled: true
   deploymentMode: SingleBinary
   auth_enabled: false
-
-  # Minimal commonConfig for filesystem path
   commonConfig:
     path_prefix: /var/loki
-    replication_factor: 1 # Still required
-
-  # Minimal storage config for filesystem
+    replication_factor: 1
   storage:
     type: 'filesystem'
     filesystem:
       chunks_directory: /var/loki/chunks
       rules_directory: /var/loki/rules
-
-  # Schema config remains the same
   schemaConfig:
     configs:
       - from: 2024-01-01
@@ -27,8 +19,6 @@ loki:
         index:
           prefix: index_
           period: 24h
-
-  # Limits remain the same
   limits_config:
     retention_period: 168h
     enforce_metric_name: false
@@ -37,21 +27,15 @@ loki:
     max_cache_freshness_per_query: 10m
     split_queries_by_interval: 15m
     max_query_parallelism: 32
-
-  # Keep singleBinary persistence and resource settings
   singleBinary:
     replicas: 1
     persistence:
       enabled: true
       size: 10Gi
-      storageClass: local-lvm # Ensure this exists
+      storageClass: local-lvm # Ensure this StorageClass exists
     resources:
-      requests:
-        cpu: 100m
-        memory: 512Mi
-      limits:
-        cpu: 500m
-        memory: 1Gi
+      requests: { cpu: 100m, memory: 512Mi }
+      limits: { cpu: 500m, memory: 1Gi }
     securityContext:
       runAsNonRoot: true
       runAsUser: 10001
@@ -63,22 +47,15 @@ loki:
     extraVolumeMounts:
       - name: tmp
         mountPath: /tmp
-
-  # Gateway remains enabled
   gateway:
     enabled: true
     replicas: 1
     resources:
-      requests:
-        cpu: 50m
-        memory: 64Mi
-      limits:
-        cpu: 100m
-        memory: 128Mi
+      requests: { cpu: 50m, memory: 64Mi }
+      limits: { cpu: 100m, memory: 128Mi }
     service:
       type: ClusterIP
       port: 80
-
   storage_config:
     boltdb_shipper:
       active_index_directory: /var/loki/index
@@ -86,7 +63,7 @@ loki:
       shared_store: filesystem
     filesystem:
       directory: /var/loki/chunks
-
+  # Explicitly disable scalable components
   read: { replicas: 0 }
   write: { replicas: 0 }
   backend: { replicas: 0 }
@@ -98,7 +75,6 @@ loki:
   indexGateway: { enabled: false }
   ruler: { enabled: false }
 
-# Promtail configuration remains mostly the same
 promtail:
   enabled: true
   config:
@@ -113,53 +89,30 @@ promtail:
         kubernetes_sd_configs:
           - role: pod
         relabel_configs:
-          - source_labels: [__meta_kubernetes_pod_namespace]
-            target_label: namespace
-          - source_labels: [__meta_kubernetes_pod_name]
-            target_label: pod
-          - source_labels: [__meta_kubernetes_pod_container_name]
-            target_label: container
-          - source_labels: [__meta_kubernetes_pod_node_name]
-            target_label: node
+          - { source_labels: [__meta_kubernetes_pod_namespace], target_label: namespace }
+          - { source_labels: [__meta_kubernetes_pod_name], target_label: pod }
+          - { source_labels: [__meta_kubernetes_pod_container_name], target_label: container }
+          - { source_labels: [__meta_kubernetes_pod_node_name], target_label: node }
   resources:
-    requests:
-      cpu: 50m
-      memory: 64Mi
-    limits:
-      cpu: 200m
-      memory: 128Mi
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { cpu: 200m, memory: 128Mi }
   securityContext:
     runAsUser: 0
     runAsGroup: 0
     readOnlyRootFilesystem: true
   extraVolumes:
-    - name: logs
-      hostPath:
-        path: /var/log/pods # Verify path
-    - name: containerruntimesock
-      hostPath:
-        path: /run/containerd/containerd.sock # Verify path
+    - { name: logs, hostPath: { path: /var/log/pods } }
+    - { name: containerruntimesock, hostPath: { path: /run/containerd/containerd.sock } }
   extraVolumeMounts:
-    - name: logs
-      mountPath: /var/log/pods
-      readOnly: true
-    - name: containerruntimesock
-      mountPath: /run/containerd/containerd.sock
-      readOnly: true
+    - { name: logs, mountPath: /var/log/pods, readOnly: true }
+    - { name: containerruntimesock, mountPath: /run/containerd/containerd.sock, readOnly: true }
   tolerations:
-    - effect: NoSchedule
-      operator: Exists
+    - { effect: NoSchedule, operator: Exists }
 
-# Keep other top-level settings disabled
-grafana:
-  enabled: false
-prometheus:
-  enabled: true # Keep enabled for metrics
-fluent-bit:
-  enabled: false
-loki-canary:
-  enabled: false
-chunksCache:
-  enabled: false
-resultsCache:
-  enabled: false
+# Disable other components
+grafana: { enabled: false }
+prometheus: { enabled: true }
+fluent-bit: { enabled: false }
+loki-canary: { enabled: false }
+chunksCache: { enabled: false }
+resultsCache: { enabled: false }
