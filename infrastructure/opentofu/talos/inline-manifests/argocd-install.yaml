@@ -107,7 +107,7 @@ spec:
               curl -sL https://raw.githubusercontent.com/amillerrr/homelab-single-proxmox-node/main/clusters/production/infrastructure/argocd/values.yaml -o /tmp/argocd-values.yaml
 
               echo "Installing ArgoCD via Helm..."
-              helm install argocd argo/argo-cd \
+              helm upgrade --install argocd argo/argo-cd \
                 --version 8.5.10 \
                 --namespace argocd \
                 --create-namespace \
