@@ -47,5 +47,5 @@ resource "proxmox_virtual_environment_download_file" "this" {
 
   file_name               = "talos-${each.value[0].schematic}-${each.value[0].version}-${var.image.platform}-${var.image.arch}.iso"
   url                     = "${var.image.factory_url}/image/${each.value[0].schematic}/${each.value[0].version}/${var.image.platform}-${var.image.arch}.iso"
-  overwrite               = false
+  overwrite               = true
 }

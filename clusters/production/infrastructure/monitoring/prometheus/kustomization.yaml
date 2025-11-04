@@ -3,9 +3,6 @@ kind: Kustomization
 
 namespace: monitoring
 
-resources:
-  - crds-app.yaml
-
 helmCharts:
   - name: kube-prometheus-stack
     repo: https://prometheus-community.github.io/helm-charts
@@ -15,7 +12,7 @@ helmCharts:
     valuesFile: values.yaml
     valuesInline:
       crds:
-        enabled: false
+        enabled: true
 
 commonAnnotations:
   app.kubernetes.io/part-of: monitoring-stack
