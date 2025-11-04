@@ -3,8 +3,8 @@ kind: Kustomization
 
 namespace: sealed-secrets
 
-resources:
-  - sealedsecret-crd.yaml
+# resources:
+# - sealedsecret-crd.yaml # Removed: The Helm chart installs its own CRD 
 
 helmCharts:
   - name: sealed-secrets

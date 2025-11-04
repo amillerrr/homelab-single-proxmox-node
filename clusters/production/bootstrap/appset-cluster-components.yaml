@@ -43,10 +43,10 @@ spec:
             namespace: default
             wave: "11"
           # Monitoring Stack
-          - name: kube-prometheus-stack-crds
-            path: infrastructure/monitoring/prometheus
-            namespace: argocd
-            wave: "10"
+          # - name: kube-prometheus-stack-crds
+          #   path: infrastructure/monitoring/prometheus
+          #   namespace: argocd
+          #   wave: "10"
           - name: kube-prometheus-stack
             path: infrastructure/monitoring/prometheus
             namespace: monitoring

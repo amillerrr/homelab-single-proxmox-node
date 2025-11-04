@@ -87,26 +87,16 @@ loki:
     filesystem:
       directory: /var/loki/chunks
 
-  read:
-    replicas: 0
-  write:
-    replicas: 0
-  backend:
-    replicas: 0
-  querier:
-    enabled: false
-  queryFrontend:
-    enabled: false
-  ingester:
-    enabled: false
-  distributor:
-    enabled: false
-  compactor:
-    enabled: false
-  indexGateway:
-    enabled: false
-  ruler:
-    enabled: false
+  read: { replicas: 0 }
+  write: { replicas: 0 }
+  backend: { replicas: 0 }
+  querier: { enabled: false }
+  queryFrontend: { enabled: false }
+  ingester: { enabled: false }
+  distributor: { enabled: false }
+  compactor: { enabled: false }
+  indexGateway: { enabled: false }
+  ruler: { enabled: false }
 
 # Promtail configuration remains mostly the same
 promtail:

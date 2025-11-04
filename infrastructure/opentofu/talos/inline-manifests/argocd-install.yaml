@@ -55,6 +55,30 @@ spec:
                 matchExpressions:
                   - key: node-role.kubernetes.io/control-plane
                     operator: Exists
+      initContainers:
+        - name: wait-for-cilium
+          image: alpine/k8s:1.30.2 # An image that includes kubectl
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 65532
+            capabilities:
+              drop: [ ALL ]
+            seccompProfile:
+              type: RuntimeDefault
+            readOnlyRootFilesystem: true
+          command:
+            - sh
+            - -c
+            - |
+              set -x
+              echo "Waiting for Cilium CNI pods to be ready..."
+              # Wait for at least one cilium-agent pod to be ready
+              kubectl wait --for=condition=ready pod \
+                -n kube-system \
+                -l k8s-app=cilium \
+                --timeout=300s
+              echo "Cilium is ready."
       containers:
         - name: argocd-bootstrap
           image: alpine/helm:3.16.1
@@ -71,7 +95,6 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
-          # --- ADD ENV VARS ---
           env:
             - name: HELM_CONFIG_HOME
               value: /tmp/.config
@@ -79,7 +102,6 @@ spec:
               value: /tmp/.cache
             - name: HELM_DATA_HOME
               value: /tmp/.local/share/helm
-          # --- END ENV VARS ---
           resources:
             requests:
               cpu: 100m

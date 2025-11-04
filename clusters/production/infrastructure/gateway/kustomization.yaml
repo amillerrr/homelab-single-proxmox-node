@@ -6,6 +6,7 @@ namespace: gateway
 resources:
   - gateway-class.yaml
   - gateway-external.yaml
+  # - gateway-internal.yaml not yet referenced by HTTPRoutes
 
 commonAnnotations:
   app.kubernetes.io/part-of: gateway
