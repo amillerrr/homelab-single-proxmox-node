@@ -76,34 +76,6 @@ wait_for_cilium() {
     log_success "Cilium is ready"
 }
 
-# Install Prometheus Operator CRDs
-install_prometheus_crds() {
-    log_info "Installing Prometheus Operator CRDs..."
-    
-    local crds=(
-        "monitoring.coreos.com_alertmanagerconfigs.yaml"
-        "monitoring.coreos.com_alertmanagers.yaml"
-        "monitoring.coreos.com_podmonitors.yaml"
-        "monitoring.coreos.com_probes.yaml"
-        "monitoring.coreos.com_prometheusagents.yaml"
-        "monitoring.coreos.com_prometheuses.yaml"
-        "monitoring.coreos.com_prometheusrules.yaml"
-        "monitoring.coreos.com_scrapeconfigs.yaml"
-        "monitoring.coreos.com_servicemonitors.yaml"
-        "monitoring.coreos.com_thanosrulers.yaml"
-    )
-    
-    local base_url="https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.77.2/example/prometheus-operator-crd"
-    
-    for crd in "${crds[@]}"; do
-        if ! kubectl apply --server-side -f "${base_url}/${crd}" &>/dev/null; then
-            log_warn "Failed to install ${crd}, but continuing..."
-        fi
-    done
-    
-    log_success "Prometheus Operator CRDs installed"
-}
-
 # Install ArgoCD
 install_argocd() {
     log_info "Installing ArgoCD..."
@@ -182,7 +154,6 @@ main() {
     check_prerequisites
     wait_for_cluster
     wait_for_cilium
-    install_prometheus_crds
     install_argocd
     deploy_applicationsets
     
