@@ -43,7 +43,10 @@ spec:
             namespace: default
             wave: "11"
           # Monitoring Stack
-          # CRDs are pre-installed during bootstrap, so we can deploy directly
+          - name: kube-prometheus-stack-crds
+            path: infrastructure/monitoring/prometheus-crds
+            namespace: monitoring
+            wave: "11"
           - name: kube-prometheus-stack
             path: infrastructure/monitoring/prometheus
             namespace: monitoring

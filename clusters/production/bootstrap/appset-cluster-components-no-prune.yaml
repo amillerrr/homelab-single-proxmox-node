@@ -13,7 +13,7 @@ spec:
           - name: cilium-config
             path: platform/cilium
             namespace: kube-system
-            wave: "9"
+            wave: "8"
   template:
     metadata:
       name: "{{.name}}"

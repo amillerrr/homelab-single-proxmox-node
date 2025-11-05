@@ -11,7 +11,7 @@ helmCharts:
     namespace: monitoring
     valuesInline:
       crds:
-        enabled: true
+        enabled: false
 
       # Grafana Configuration
       grafana:
