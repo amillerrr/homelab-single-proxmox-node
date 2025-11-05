@@ -3,7 +3,7 @@ locals {
   kubernetes_endpoint         = coalesce(var.cluster.vip, local.first_control_plane_node_ip)
   
   # Only include Gateway API CRDs as extra manifests
-  # ArgoCD will manage other resources via ApplicationSet
+  # Everything else will be managed via bootstrap script + ArgoCD
   extra_manifests = concat(var.cluster.extra_manifests, [
     "https://github.com/kubernetes-sigs/gateway-api/releases/download/v${var.cluster.gateway_api_version}/standard-install.yaml",
   ])
@@ -20,7 +20,8 @@ data "talos_client_configuration" "this" {
 }
 
 # Bootstrap manifests for cluster initialization
-# These run once during cluster creation
+# Stage 1: Only Cilium CNI (required for networking)
+# Stage 2: Everything else installed via bootstrap script
 resource "terraform_data" "inline_manifests" {
   input = [
     {
@@ -40,14 +41,6 @@ resource "terraform_data" "inline_manifests" {
     {
       name     = "cilium-bootstrap"
       contents = file("${path.module}/inline-manifests/cilium-install.yaml")
-    },
-    {
-      name     = "prometheus-crds-bootstrap"
-      contents = file("${path.module}/inline-manifests/prometheus-crds-install.yaml")
-    },
-    {
-      name     = "argocd-bootstrap"
-      contents = file("${path.module}/inline-manifests/argocd-install.yaml")
     }
   ]
 }

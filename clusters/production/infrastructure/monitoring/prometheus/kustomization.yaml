@@ -12,7 +12,7 @@ helmCharts:
     valuesFile: values.yaml
     valuesInline:
       crds:
-        enabled: true
+        enabled: false
 
 commonAnnotations:
   app.kubernetes.io/part-of: monitoring-stack
