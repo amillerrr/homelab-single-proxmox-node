@@ -96,3 +96,7 @@ spec:
           kind: HTTPRoute
           jsonPointers:
             - /status
+        - group: ""
+          kind: PersistentVolumeClaim
+          jsonPointers:
+            - /status
