@@ -81,7 +81,7 @@ spec:
               echo "Cilium is ready."
       containers:
         - name: argocd-bootstrap
-          image: alpine/helm:3.16.1
+          image: alpine/k8s:1.30.2
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
@@ -114,6 +114,11 @@ spec:
             - -c
             - |
               set -ex
+
+              wget -q https://get.helm.sh/helm-v3.16.1-linux-amd64.tar.gz -O /tmp/helm.tar.gz
+              tar -xzf /tmp/helm.tar.gz -C /tmp
+              mv /tmp/linux-amd64/helm /usr/local/bin/helm
+              chmod +x /usr/local/bin/helm
 
               echo "Waiting for API server to be available..."
               until nslookup kubernetes.default.svc.cluster.local >/dev/null 2>&1; do
