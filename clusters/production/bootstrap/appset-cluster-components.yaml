@@ -38,10 +38,6 @@ spec:
             path: config/routes
             namespace: default
             wave: "9"
-          - name: nginx-example
-            path: apps/nginx-example
-            namespace: default
-            wave: "11"
           # Monitoring Stack
           - name: kube-prometheus-stack-crds
             path: infrastructure/monitoring/prometheus-crds
@@ -59,6 +55,11 @@ spec:
             path: config/monitoring
             namespace: monitoring
             wave: "14"
+          # Applications
+          - name: nginx-example
+            path: apps/nginx-example
+            namespace: default
+            wave: "15"
   template:
     metadata:
       name: "{{.name}}"
@@ -84,6 +85,7 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
+          - SkipDryRunOnMissingResource=true
         retry:
           limit: 10
           backoff:
