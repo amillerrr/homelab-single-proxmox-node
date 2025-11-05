@@ -117,8 +117,7 @@ spec:
 
               wget -q https://get.helm.sh/helm-v3.16.1-linux-amd64.tar.gz -O /tmp/helm.tar.gz
               tar -xzf /tmp/helm.tar.gz -C /tmp
-              mv /tmp/linux-amd64/helm /usr/local/bin/helm
-              chmod +x /usr/local/bin/helm
+              export PATH="/tmp/linux-amd64:$PATH"
 
               echo "Waiting for API server to be available..."
               until nslookup kubernetes.default.svc.cluster.local >/dev/null 2>&1; do
