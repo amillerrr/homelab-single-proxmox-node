@@ -13,9 +13,8 @@ controller:
 
 # Server
 server:
-  # Expose via LoadBalancer (Cilium will assign IP)
   service:
-    type: LoadBalancer
+    type: ClusterIP
   
   # Resource limits
   resources:
