@@ -134,7 +134,6 @@ spec:
                 --namespace argocd \
                 --create-namespace \
                 -f /tmp/argocd-values.yaml \
-                --wait --timeout 10m
 
               echo "Waiting for ArgoCD deployments to be ready..."
               kubectl wait --for=condition=available --timeout=60s \
