@@ -32,7 +32,7 @@ loki:
     persistence:
       enabled: true
       size: 10Gi
-      storageClass: local-lvm # Ensure this StorageClass exists
+      storageClass: local-path # Ensure this StorageClass exists
     resources:
       requests: { cpu: 100m, memory: 512Mi }
       limits: { cpu: 500m, memory: 1Gi }

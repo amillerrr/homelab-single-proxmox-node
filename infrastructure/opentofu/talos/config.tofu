@@ -41,6 +41,10 @@ resource "terraform_data" "inline_manifests" {
     {
       name     = "cilium-bootstrap"
       contents = file("${path.module}/inline-manifests/cilium-install.yaml")
+    },
+    {
+      name     = "storage-provisioner"
+      contents = file("${path.module}/inline-manifests/storage-provisioner-install.yaml")
     }
   ]
 }
