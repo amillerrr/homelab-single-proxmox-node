@@ -42,6 +42,10 @@ resource "terraform_data" "inline_manifests" {
       contents = file("${path.module}/inline-manifests/cilium-install.yaml")
     },
     {
+      name     = "prometheus-crds-bootstrap"
+      contents = file("${path.module}/inline-manifests/prometheus-crds-install.yaml")
+    },
+    {
       name     = "argocd-bootstrap"
       contents = file("${path.module}/inline-manifests/argocd-install.yaml")
     }
