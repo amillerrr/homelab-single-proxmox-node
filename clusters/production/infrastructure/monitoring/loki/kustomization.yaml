@@ -84,26 +84,26 @@ helmCharts:
           filesystem:
             directory: /var/loki/chunks
         # Explicitly disable scalable components
+        backend:
+          replicas: 0
         read:
           replicas: 0
         write:
           replicas: 0
-        backend:
+        ingester:
+          replicas: 0
+        distributor:
           replicas: 0
         querier:
-          enabled: false
+          replicas: 0
         queryFrontend:
-          enabled: false
-        ingester:
-          enabled: false
-        distributor:
-          enabled: false
+          replicas: 0
         compactor:
-          enabled: false
+          replicas: 0
         indexGateway:
-          enabled: false
+          replicas: 0
         ruler:
-          enabled: false
+          replicas: 0
 
       promtail:
         enabled: true
