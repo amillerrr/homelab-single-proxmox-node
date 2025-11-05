@@ -135,21 +135,8 @@ spec:
                 --create-namespace \
                 -f /tmp/argocd-values.yaml \
 
-              echo "Waiting for ArgoCD deployments to be ready..."
-              kubectl wait --for=condition=available --timeout=60s \
-                deployment/argocd-server -n argocd
-
-              kubectl wait --for=condition=available --timeout=60s \
-                deployment/argocd-repo-server -n argocd
-
-              kubectl wait --for=condition=available --timeout=60s \
-                deployment/argocd-applicationset-controller -n argocd
-
-              echo "ArgoCD components are ready."
-
-              echo "Waiting for ApplicationSet CRD to be established..."
-              kubectl wait --for condition=established --timeout=60s \
-                crd/applicationsets.argoproj.io
+              echo "ArgoCD installed successfully."
+              sleep 30
 
               echo "Applying ApplicationSet manifests..."
               kubectl apply -f https://raw.githubusercontent.com/amillerrr/homelab-single-proxmox-node/main/clusters/production/bootstrap/appset-cluster-components.yaml
