@@ -39,27 +39,27 @@ spec:
             namespace: default
             wave: "9"
           # Monitoring Stack
-          - name: kube-prometheus-stack-crds
-            path: infrastructure/monitoring/prometheus-crds
-            namespace: monitoring
-            wave: "11"
+          # - name: kube-prometheus-stack-crds
+          #   path: infrastructure/monitoring/prometheus-crds
+          #   namespace: monitoring
+          #   wave: "11"
           - name: kube-prometheus-stack
             path: infrastructure/monitoring/prometheus
             namespace: monitoring
-            wave: "12"
+            wave: "11"
           - name: loki-stack
             path: infrastructure/monitoring/loki
             namespace: monitoring
-            wave: "13"
+            wave: "12"
           - name: monitoring-routes
             path: config/monitoring
             namespace: monitoring
-            wave: "14"
+            wave: "13"
           # Applications
           - name: nginx-example
             path: apps/nginx-example
             namespace: default
-            wave: "15"
+            wave: "14"
   template:
     metadata:
       name: "{{.name}}"
