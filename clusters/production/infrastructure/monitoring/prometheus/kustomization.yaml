@@ -230,11 +230,6 @@ helmCharts:
       # Prometheus Operator
       prometheusOperator:
         enabled: true
-        
-        admissionWebhooks:
-          securityContext:
-            runAsUser: 0
-            runAsGroup: 0
 
         resources:
           requests:
