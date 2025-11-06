@@ -29,11 +29,11 @@ spec:
           - name: wildcard-certificate
             path: config/certificates
             namespace: gateway
-            wave: "6"
+            wave: "7"
           - name: gateway
             path: infrastructure/gateway
             namespace: gateway
-            wave: "7"
+            wave: "8"
           - name: routes
             path: config/routes
             namespace: default

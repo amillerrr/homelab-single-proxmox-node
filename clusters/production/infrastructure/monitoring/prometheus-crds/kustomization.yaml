@@ -15,7 +15,7 @@ helmCharts:
       crds:
         enabled: true
       defaultRules:
-        enabled: false
+        create: false
       prometheusOperator:
         enabled: false
       prometheus:
