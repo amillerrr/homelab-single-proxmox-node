@@ -145,14 +145,14 @@ data:
       name: helper-pod
     spec:
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 65532
-        fsGroup: 65532
+        runAsNonRoot: false
+        runAsUser: 0
+        fsGroup: 0
         seccompProfile:
           type: RuntimeDefault
       containers:
       - name: helper-pod
-        image: busybox:1.36
+        image: busybox:1.37
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
