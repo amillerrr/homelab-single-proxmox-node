@@ -15,7 +15,7 @@ spec:
           - name: nginx-example
             path: apps/nginx-example
             namespace: default
-            wave: "10"
+            wave: "12"
             description: "Example nginx application with HTTPRoute"
           
           # Add more applications here as needed:
