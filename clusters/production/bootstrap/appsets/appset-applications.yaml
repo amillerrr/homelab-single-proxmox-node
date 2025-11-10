@@ -2,28 +2,43 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: cluster-components-no-prune
+  name: user-applications
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
 spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
   generators:
     - list:
         elements:
-          - name: cilium-config
-            path: platform/cilium
-            namespace: kube-system
-            wave: "6"
+          - name: nginx-example
+            path: apps/nginx-example
+            namespace: default
+            wave: "10"
+            description: "Example nginx application with HTTPRoute"
+          
+          # Add more applications here as needed:
+          # - name: my-app
+          #   path: apps/my-app
+          #   namespace: default
+          #   wave: "10"
+          #   description: "My application description"
+  
   template:
     metadata:
       name: "{{.name}}"
       namespace: argocd
       annotations:
         argocd.argoproj.io/sync-wave: "{{.wave}}"
+        description: "{{.description}}"
+      labels:
+        app.kubernetes.io/managed-by: argocd
+        app.kubernetes.io/part-of: applications
       finalizers:
         - resources-finalizer.argocd.argoproj.io
     spec:
-      project: default
+      project: applications
       source:
         repoURL: https://github.com/amillerrr/homelab-single-proxmox-node.git
         targetRevision: main
@@ -33,18 +48,20 @@ spec:
         namespace: "{{.namespace}}"
       syncPolicy:
         automated:
-          prune: false
+          prune: true
           selfHeal: true
           allowEmpty: false
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
+          - SkipDryRunOnMissingResource=true
+          - ApplyOutOfSyncOnly=true
         retry:
-          limit: 10
+          limit: 5
           backoff:
-            duration: 10s
+            duration: 5s
             factor: 2
-            maxDuration: 5m
+            maxDuration: 3m
       ignoreDifferences:
         - group: apps
           kind: Deployment
@@ -52,5 +69,5 @@ spec:
             - /spec/replicas
         - group: gateway.networking.k8s.io
           kind: HTTPRoute
-          jsonPointers:
-            - /status
+          jqPathExpressions:
+            - .status

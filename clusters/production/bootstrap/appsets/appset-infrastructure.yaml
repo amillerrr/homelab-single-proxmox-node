@@ -2,8 +2,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: cluster-components
+  name: infrastructure-components
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
@@ -14,62 +16,40 @@ spec:
             path: infrastructure/sealed-secrets
             namespace: sealed-secrets
             wave: "1"
+            description: "Bitnami Sealed Secrets for secret encryption"
+          
           - name: cert-manager-rbac
             path: infrastructure/cert-manager-rbac
             namespace: kube-system
             wave: "2"
+            description: "RBAC prerequisites for cert-manager (leader election)"
+          
           - name: cert-manager
             path: infrastructure/cert-manager
             namespace: cert-manager
             wave: "3"
+            description: "Jetstack cert-manager for certificate management"
+          
           - name: cert-manager-config
             path: config/cert-manager
             namespace: cert-manager
-            wave: "5"
-          - name: wildcard-certificate
-            path: config/certificates
-            namespace: gateway
-            wave: "7"
-          - name: gateway
-            path: infrastructure/gateway
-            namespace: gateway
-            wave: "8"
-          - name: routes
-            path: config/routes
-            namespace: default
-            wave: "9"
-          # Monitoring Stack
-          # - name: kube-prometheus-stack-crds
-          #   path: infrastructure/monitoring/prometheus-crds
-          #   namespace: monitoring
-          #   wave: "11"
-          - name: kube-prometheus-stack
-            path: infrastructure/monitoring/prometheus
-            namespace: monitoring
-            wave: "11"
-          - name: loki-stack
-            path: infrastructure/monitoring/loki
-            namespace: monitoring
-            wave: "12"
-          - name: monitoring-routes
-            path: config/monitoring
-            namespace: monitoring
-            wave: "13"
-          # Applications
-          - name: nginx-example
-            path: apps/nginx-example
-            namespace: default
-            wave: "14"
+            wave: "4"
+            description: "Cert-manager ClusterIssuer and API tokens"
+  
   template:
     metadata:
       name: "{{.name}}"
       namespace: argocd
       annotations:
         argocd.argoproj.io/sync-wave: "{{.wave}}"
+        description: "{{.description}}"
+      labels:
+        app.kubernetes.io/managed-by: argocd
+        app.kubernetes.io/part-of: infrastructure
       finalizers:
         - resources-finalizer.argocd.argoproj.io
     spec:
-      project: default
+      project: infrastructure
       source:
         repoURL: https://github.com/amillerrr/homelab-single-proxmox-node.git
         targetRevision: main
@@ -86,22 +66,19 @@ spec:
           - CreateNamespace=true
           - ServerSideApply=true
           - SkipDryRunOnMissingResource=true
+          - RespectIgnoreDifferences=true
         retry:
-          limit: 10
+          limit: 5
           backoff:
-            duration: 10s
+            duration: 5s
             factor: 2
-            maxDuration: 5m
+            maxDuration: 3m
       ignoreDifferences:
         - group: apps
           kind: Deployment
           jsonPointers:
             - /spec/replicas
-        - group: gateway.networking.k8s.io
-          kind: HTTPRoute
-          jsonPointers:
-            - /status
-        - group: ""
-          kind: PersistentVolumeClaim
-          jsonPointers:
-            - /status
+        - group: admissionregistration.k8s.io
+          kind: ValidatingWebhookConfiguration
+          jqPathExpressions:
+            - .webhooks[].clientConfig.caBundle

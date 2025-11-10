@@ -1,0 +1,33 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infrastructure
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: Core infrastructure components (secrets, certificates, networking)
+  
+  sourceRepos:
+    - 'https://github.com/amillerrr/homelab-single-proxmox-node.git'
+    - 'https://charts.jetstack.io'
+    - 'https://bitnami-labs.github.io/sealed-secrets'
+  
+  destinations:
+    - namespace: 'kube-system'
+      server: '*'
+    - namespace: 'cert-manager'
+      server: '*'
+    - namespace: 'sealed-secrets'
+      server: '*'
+    - namespace: 'gateway'
+      server: '*'
+  
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'

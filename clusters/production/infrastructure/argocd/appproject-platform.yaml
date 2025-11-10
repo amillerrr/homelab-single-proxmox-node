@@ -1,20 +1,25 @@
+---
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: default
+  name: platform
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  description: Default project
+  description: Platform-level configurations (CNI, storage, etc.) - typically managed by infrastructure but deployed by ArgoCD
+  
   sourceRepos:
-    - '*'
+    - 'https://github.com/amillerrr/homelab-single-proxmox-node.git'
+  
   destinations:
-    - namespace: '*'
+    - namespace: 'kube-system'
       server: '*'
+  
   clusterResourceWhitelist:
-    - group: '*'
+    - group: 'cilium.io'
       kind: '*'
+  
   namespaceResourceWhitelist:
     - group: '*'
       kind: '*'

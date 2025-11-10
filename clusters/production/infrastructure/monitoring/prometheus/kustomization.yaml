@@ -230,6 +230,10 @@ helmCharts:
       # Prometheus Operator
       prometheusOperator:
         enabled: true
+        admissionWebhooks:
+          enabled: false  # This prevents the hook Jobs from being created
+        tls:
+          enabled: false
 
         resources:
           requests:

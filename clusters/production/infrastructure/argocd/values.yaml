@@ -26,7 +26,6 @@ server:
       memory: 256Mi
   
   # Enable insecure mode (no TLS, using Gateway for TLS termination)
-  # Set to false if you want ArgoCD to handle TLS
   insecure: true
   
   # Extra args
@@ -90,8 +89,35 @@ configs:
   cm:
     kustomize.buildOptions: "--enable-helm --load-restrictor LoadRestrictionsNone"
     application.namespaces: "*"
+    
+    # Resource tracking method
+    application.resourceTrackingMethod: annotation
+    
+    # Timeout for sync operations
+    timeout.reconciliation: 180s
   
   # Params
   params:
     server.insecure: true
     application.namespaces: "*"
+    
+    # ApplicationSet controller
+    applicationsetcontroller.enable.progressive.syncs: true
+    
+    # Controller
+    controller.status.processors: 20
+    controller.operation.processors: 10
+    controller.self.heal.timeout.seconds: 5
+  
+  # RBAC policies
+  rbac:
+    policy.default: role:readonly
+    policy.csv: |
+      # Default policies for AppProjects
+      p, role:infrastructure-admin, applications, *, infrastructure/*, allow
+      p, role:monitoring-admin, applications, *, monitoring/*, allow
+      p, role:platform-admin, applications, *, platform/*, allow
+      p, role:app-admin, applications, *, applications/*, allow
+      
+      # Grant admin all permissions
+      g, admin, role:admin

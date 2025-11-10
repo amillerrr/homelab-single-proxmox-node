@@ -103,30 +103,53 @@ install_argocd() {
 }
 
 # Deploy ApplicationSets
-deploy_applicationsets() {
-    log_info "Deploying ApplicationSets..."
+deploy_appprojects() {
+   log_info "Deploying ArgoCD AppProjects..."
     
     # Wait for ArgoCD to be ready
-    sleep 10
-    
     if ! kubectl wait --for=condition=available deployment/argocd-server \
         -n argocd \
         --timeout=120s 2>/dev/null; then
-        log_warn "ArgoCD server not ready, but continuing..."
+        log_warn "ArgoCD server not fully ready, but continuing..."
     fi
     
-    # Apply ApplicationSets
-    if ! kubectl apply -f clusters/production/bootstrap/appset-cluster-components.yaml; then
-        log_error "Failed to apply cluster-components ApplicationSet"
+    # Apply AppProjects
+    local projects=(
+        "clusters/production/infrastructure/argocd/appproject-infrastructure.yaml"
+        "clusters/production/infrastructure/argocd/appproject-monitoring.yaml"
+        "clusters/production/infrastructure/argocd/appproject-platform.yaml"
+        "clusters/production/infrastructure/argocd/appproject-applications.yaml"
+    )
+    
+    for project in "${projects[@]}"; do
+        if [ -f "$project" ]; then
+            if ! kubectl apply -f "$project"; then
+                log_error "Failed to apply $project"
+                exit 1
+            fi
+        else
+            log_warn "Project file not found: $project (skipping)"
+        fi
+    done
+    
+    log_success "AppProjects deployed" 
+}
+
+# Deploy root Application (App of AppSets)
+deploy_root_application() {
+    log_info "Deploying root Application (App of AppSets)..."
+    
+    # Give ArgoCD a moment to settle
+    sleep 5
+    
+    # Apply the root application
+    if ! kubectl apply -f clusters/production/bootstrap/argocd-app-of-appsets.yaml; then
+        log_error "Failed to apply root Application"
         exit 1
     fi
     
-    if ! kubectl apply -f clusters/production/bootstrap/appset-cluster-components-no-prune.yaml; then
-        log_error "Failed to apply cluster-components-no-prune ApplicationSet"
-        exit 1
-    fi
-    
-    log_success "ApplicationSets deployed"
+    log_success "Root Application deployed"
+    log_info "ArgoCD is now self-managing"
 }
 
 # Get ArgoCD credentials
@@ -145,6 +168,22 @@ show_argocd_credentials() {
     echo ""
 }
 
+# Summarize next steps
+show_next_steps() {
+    echo ""
+    log_success "Bootstrap complete!"
+    echo ""
+    log_info "Monitor progress:"
+    echo "  kubectl get applications -n argocd -w"
+    echo ""
+    log_info "View ApplicationSets:"
+    echo "  kubectl get applicationsets -n argocd"
+    echo ""
+    log_info "Check a specific application:"
+    echo "  kubectl describe application <name> -n argocd"
+    echo ""
+}
+
 # Main execution
 main() {
     echo ""
@@ -155,15 +194,10 @@ main() {
     wait_for_cluster
     wait_for_cilium
     install_argocd
-    deploy_applicationsets
+    deploy_appprojects
+    deploy_root_application
     
-    echo ""
-    log_success "Bootstrap complete!"
-    echo ""
-    log_info "ArgoCD will now sync all cluster components automatically."
-    log_info "Monitor progress with: kubectl get applications -n argocd -w"
-    echo ""
-    
+    show_next_steps
     show_argocd_credentials
 }
 
