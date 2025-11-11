@@ -12,7 +12,7 @@ defaultSettings:
   replicaSoftAntiAffinity: false
   storageOverProvisioningPercentage: "100"
   storageMinimalAvailablePercentage: "10"
-  defaultReplicaCount: 1 # CRITICAL: Sets default to 1 for single proxmox node
+  defaultReplicaCount: "1" # CRITICAL: Sets default to 1 for single proxmox node
 
 # Optional: Expose the UI
 # ingress:
