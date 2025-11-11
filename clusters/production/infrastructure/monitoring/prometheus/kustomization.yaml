@@ -115,9 +115,9 @@ helmCharts:
         prometheusSpec:
           # Security context
           securityContext:
-            fsGroup: 2000
-            runAsNonRoot: false
-            runAsUser: 1000
+            runAsNonRoot: true
+            runAsUser: 65534
+            fsGroup: 65534
 
           # Retention period
           retention: 15d
