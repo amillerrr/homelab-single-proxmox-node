@@ -181,48 +181,48 @@ helmCharts:
       alertmanager:
         enabled: false
         
-        alertmanagerSpec:
-          # Resource limits
-          resources:
-            requests:
-              cpu: 10m
-              memory: 64Mi
-            limits:
-              cpu: 100m
-              memory: 128Mi
-          
-          # Storage
-          storage:
-            volumeClaimTemplate:
-              spec:
-                storageClassName: local-path
-                accessModes: ["ReadWriteOnce"]
-                resources:
-                  requests:
-                    storage: 5Gi
-          
-          # Security context
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 65534
-            fsGroup: 65534
-        
-        # Basic config - customize alerts routing here
-        config:
-          global:
-            resolve_timeout: 5m
-          route:
-            group_by: ['alertname', 'cluster']
-            group_wait: 10s
-            group_interval: 10s
-            repeat_interval: 12h
-            receiver: 'null'
-            routes:
-              - match:
-                  alertname: Watchdog
-                receiver: 'null'
-          receivers:
-            - name: 'null'
+        # alertmanagerSpec:
+        #   # Resource limits
+        #   resources:
+        #     requests:
+        #       cpu: 10m
+        #       memory: 64Mi
+        #     limits:
+        #       cpu: 100m
+        #       memory: 128Mi
+        #   
+        #   # Storage
+        #   storage:
+        #     volumeClaimTemplate:
+        #       spec:
+        #         storageClassName: local-path
+        #         accessModes: ["ReadWriteOnce"]
+        #         resources:
+        #           requests:
+        #             storage: 5Gi
+        #   
+        #   # Security context
+        #   securityContext:
+        #     runAsNonRoot: true
+        #     runAsUser: 65534
+        #     fsGroup: 65534
+        # 
+        # # Basic config - customize alerts routing here
+        # config:
+        #   global:
+        #     resolve_timeout: 5m
+        #   route:
+        #     group_by: ['alertname', 'cluster']
+        #     group_wait: 10s
+        #     group_interval: 10s
+        #     repeat_interval: 12h
+        #     receiver: 'null'
+        #     routes:
+        #       - match:
+        #           alertname: Watchdog
+        #         receiver: 'null'
+        #   receivers:
+        #     - name: 'null'
           # Add your notification receivers here (email, slack, etc.)
 
       # Node Exporter
