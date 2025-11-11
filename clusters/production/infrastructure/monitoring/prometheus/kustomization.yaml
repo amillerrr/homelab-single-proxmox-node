@@ -52,12 +52,13 @@ helmCharts:
                 type: loki
                 url: http://loki-stack-gateway.monitoring.svc:80
                 access: proxy
+                isDefault: false
         
         # Security context
         securityContext:
           runAsNonRoot: true
-          runAsUser: 472
-          fsGroup: 472
+          runAsUser: 65534
+          fsGroup: 65534
         
         # Default dashboards
         dashboardProviders:
@@ -133,8 +134,8 @@ helmCharts:
           # Security context
           securityContext:
             runAsNonRoot: true
-            runAsUser: 1000
-            fsGroup: 2000
+            runAsUser: 65534
+            fsGroup: 65534
           
           # Enable admin API for management
           enableAdminAPI: true
@@ -182,8 +183,8 @@ helmCharts:
           # Security context
           securityContext:
             runAsNonRoot: true
-            runAsUser: 1000
-            fsGroup: 2000
+            runAsUser: 65534
+            fsGroup: 65534
         
         # Basic config - customize alerts routing here
         config:
