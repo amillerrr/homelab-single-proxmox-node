@@ -44,7 +44,7 @@ helmCharts:
           persistence:
             enabled: true
             size: 10Gi
-            storageClass: local-path
+            storageClass: longhorn
           resources:
             requests:
               cpu: 100m
