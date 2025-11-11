@@ -40,6 +40,10 @@ helmCharts:
         service:
           type: ClusterIP
           port: 80
+
+        sidecar:
+          datasources:
+            enabled: false
         
         # Pre-configured data sources
         datasources:
@@ -139,6 +143,14 @@ helmCharts:
             runAsNonRoot: true
             runAsUser: 65534
             fsGroup: 65534
+            fsGroupChangePolicy: "OnRootMismatch"  # Add this
+  
+          # Also add pod-level securityContext
+          podSecurityContext:
+            runAsNonRoot: true
+            runAsUser: 65534
+            fsGroup: 65534
+            fsGroupChangePolicy: "OnRootMismatch"
           
           # Enable admin API for management
           enableAdminAPI: true
@@ -210,6 +222,13 @@ helmCharts:
       # Node Exporter
       nodeExporter:
         enabled: true
+
+        hostPID: true
+        hostNetwork: true
+        
+        securityContext:
+          runAsNonRoot: false
+          runAsUser: 65534
         
         resources:
           requests:
