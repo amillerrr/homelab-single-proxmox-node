@@ -4,6 +4,9 @@ persistence:
 preflight:
   enabled: false # Talos manages prerequisites, disable this check
 
+preUpgradeChecker:
+  jobEnabled: false
+
 defaultSettings:
   backupTarget: ""
   backupTargetCredentialSecret: ""
