@@ -65,7 +65,6 @@ spec:
         syncOptions:
           - CreateNamespace=true
           - ServerSideApply=true
-          - CreateNamespace=true:pod-security.kubernetes.io/enforce=privileged
           - SkipDryRunOnMissingResource=true
           - RespectIgnoreDifferences=true
         retry:
