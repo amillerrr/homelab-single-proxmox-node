@@ -117,7 +117,15 @@ helmCharts:
             runAsNonRoot: true
             runAsUser: 65534
             fsGroup: 65534
-            fsGroupChangePolicy: "OnRootMismatch"  # Add this
+
+          containers:
+            - name: prometheus
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+                readOnlyRootFilesystem: false
 
           # Retention period
           retention: 15d
