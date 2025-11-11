@@ -35,7 +35,7 @@ helmCharts:
         persistence:
           enabled: true
           size: 5Gi
-          storageClassName: local-path
+          storageClassName: longhorn
         
         # Service configuration
         service:
@@ -115,9 +115,11 @@ helmCharts:
         prometheusSpec:
           # Security context
           securityContext:
-            runAsNonRoot: false
-            runAsUser: 0
-            fsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 65534
+
+          podSecurityContext:
+            fsGroup: 65534
 
           # Retention period
           retention: 15d
@@ -136,7 +138,7 @@ helmCharts:
           storageSpec:
             volumeClaimTemplate:
               spec:
-                storageClassName: local-path
+                storageClassName: longhorn
                 accessModes: ["ReadWriteOnce"]
                 resources:
                   requests:
@@ -183,7 +185,7 @@ helmCharts:
         #   storage:
         #     volumeClaimTemplate:
         #       spec:
-        #         storageClassName: local-path
+        #         storageClassName: longhorn
         #         accessModes: ["ReadWriteOnce"]
         #         resources:
         #           requests:

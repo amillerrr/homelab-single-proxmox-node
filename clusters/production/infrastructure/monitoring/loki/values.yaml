@@ -32,7 +32,7 @@ loki:
     persistence:
       enabled: true
       size: 10Gi
-      storageClass: local-path # Ensure this StorageClass exists
+      storageClass: longhorn
     resources:
       requests: { cpu: 100m, memory: 512Mi }
       limits: { cpu: 500m, memory: 1Gi }

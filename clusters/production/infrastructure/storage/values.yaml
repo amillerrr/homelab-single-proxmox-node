@@ -1,0 +1,25 @@
+persistence:
+  defaultClassReplicaCount: 1 # CRITICAL: Sets replicas to 1
+
+preflight:
+  enabled: false # Talos manages prerequisites, disable this check
+
+defaultSettings:
+  backupTarget: ""
+  backupTargetCredentialSecret: ""
+  createDefaultDiskLabeledNodes: true
+  defaultDataPath: "/var/lib/longhorn"
+  replicaSoftAntiAffinity: false
+  storageOverProvisioningPercentage: 100
+  storageMinimalAvailablePercentage: 10
+  defaultReplicaCount: 1 # CRITICAL: Sets default to 1 for single proxmox node
+
+# Optional: Expose the UI
+# ingress:
+#   enabled: true
+#   ingressClassName: cilium
+#   host: longhorn.your-domain.com
+#   tls: true
+#   tlsSecret: longhorn-tls
+#   annotations:
+#     cert-manager.io/cluster-issuer: letsencrypt-production

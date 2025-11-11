@@ -12,6 +12,7 @@ spec:
   sourceRepos:
     - 'https://github.com/amillerrr/homelab-single-proxmox-node.git'
     - 'https://charts.jetstack.io'
+    - 'https://charts.longhorn.io'
     - 'https://bitnami-labs.github.io/sealed-secrets'
   
   destinations:
@@ -20,6 +21,8 @@ spec:
     - namespace: 'cert-manager'
       server: '*'
     - namespace: 'sealed-secrets'
+      server: '*'
+    - namespace: 'longhorn-system'
       server: '*'
     - namespace: 'gateway'
       server: '*'

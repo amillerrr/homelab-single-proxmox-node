@@ -15,19 +15,19 @@ spec:
           - name: kube-prometheus-stack
             path: infrastructure/monitoring/prometheus
             namespace: monitoring
-            wave: "8"
+            wave: "0"
             description: "Prometheus Operator, Grafana, and Alertmanager"
           
           - name: loki-stack
             path: infrastructure/monitoring/loki
             namespace: monitoring
-            wave: "9"
+            wave: "1"
             description: "Loki log aggregation with Promtail"
           
           - name: monitoring-routes
             path: config/monitoring
             namespace: monitoring
-            wave: "10"
+            wave: "2"
             description: "HTTPRoutes for Grafana, Prometheus, and Alertmanager"
   
   template:

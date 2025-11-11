@@ -5,7 +5,7 @@ metadata:
   name: user-applications
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-wave: "5"
 spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
@@ -15,7 +15,7 @@ spec:
           - name: nginx-example
             path: apps/nginx-example
             namespace: default
-            wave: "11"
+            wave: "0"
             description: "Example nginx application with HTTPRoute"
           
           # Add more applications here as needed:

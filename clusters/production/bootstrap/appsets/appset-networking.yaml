@@ -15,19 +15,19 @@ spec:
           - name: wildcard-certificate
             path: config/certificates
             namespace: gateway
-            wave: "5"
+            wave: "0"
             description: "Wildcard TLS certificate for *.mill3r.la"
           
           - name: gateway
             path: infrastructure/gateway
             namespace: gateway
-            wave: "6"
+            wave: "1"
             description: "Cilium Gateway API resources (GatewayClass, Gateways)"
           
           - name: routes
             path: config/routes
             namespace: default
-            wave: "7"
+            wave: "2"
             description: "HTTPRoutes for application ingress"
   
   template:
