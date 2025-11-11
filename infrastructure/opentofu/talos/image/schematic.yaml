@@ -4,3 +4,4 @@ customization:
             - siderolabs/i915
             - siderolabs/intel-ucode
             - siderolabs/qemu-guest-agent
+            - siderolabs/iscsi-tools
