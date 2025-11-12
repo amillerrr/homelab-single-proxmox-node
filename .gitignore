@@ -52,6 +52,9 @@ sealed-secrets-key-backup-*.yaml
 !clusters/**/sealed-secrets/
 !clusters/**/*-sealed.yaml
 
+# Helper script
+vmshutdown.sh
+
 # Logs
 crash.log
 *.log

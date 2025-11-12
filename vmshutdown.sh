@@ -8,10 +8,12 @@ ssh ms << EOF
 
   echo "--- Executing on Proxmox host ---"
 
-  for vmid in $VM_IDS; do
-    echo "Sending graceful shutdown to VM \$vmid..."
-    qm shutdown $vmid
-  done
+  qm shutdown 201 --forceStop
+  qm shutdown 202 --forceStop
+  qm shutdown 203 --forceStop
+  qm shutdown 301 --forceStop
+  qm shutdown 302 --forceStop
+  qm shutdown 303 --forceStop
 
   echo "--- All shutdown commands sent ---"
 
