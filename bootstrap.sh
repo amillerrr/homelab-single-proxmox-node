@@ -76,6 +76,26 @@ wait_for_cilium() {
     log_success "Cilium is ready"
 }
 
+# Label worker nodes
+label_worker_nodes() {
+    log_info "Labeling worker nodes..."
+    
+    local labeled=0
+    
+    for node in $(kubectl get nodes -o name | grep -E 'wk-[0-9]+$' | sed 's|node/||'); do
+        if kubectl label node "$node" node-role.kubernetes.io/worker=true --overwrite 2>/dev/null; then
+            log_success "Labeled: $node"
+            ((labeled++))
+        fi
+    done
+    
+    if [ $labeled -eq 0 ]; then
+        log_warn "No worker nodes found matching pattern 'wk-*'"
+    else
+        log_success "Labeled $labeled worker node(s)"
+    fi
+}
+
 # Install ArgoCD
 install_argocd() {
     log_info "Installing ArgoCD..."
@@ -193,6 +213,7 @@ main() {
     check_prerequisites
     wait_for_cluster
     wait_for_cilium
+    label_worker_nodes
     install_argocd
     deploy_appprojects
     deploy_root_application
