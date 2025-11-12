@@ -1,5 +1,6 @@
 machine:
-  node-role.kubernetes.io/worker: "true"
+  nodeLabels:
+    node-role.kubernetes.io/worker: "true"
   network:
     interfaces:
       - deviceSelector:
