@@ -1,4 +1,8 @@
 machine:
+  kernel:
+    modules:
+      - name: iscsi_tcp
+      - name: iscsi_generic
   kubelet:
     extraMounts:
       - destination: /var/lib/longhorn
@@ -8,6 +12,18 @@ machine:
           - bind
           - rshared
           - rw
+      - destination: /lib/modules
+        type: bind
+        source: /lib/modules
+        options:
+          - ro
+          - bind
+      - destination: /usr/sbin/iscsiadm
+        type: bind
+        source: /usr/sbin/iscsiadm
+        options:
+          - ro
+          - bind
     image: ghcr.io/siderolabs/kubelet:${kubernetes_version}
     ${indent(4, kubelet)}
   nodeLabels:
