@@ -1,4 +1,8 @@
 machine:
+  kernel:
+    modules:
+      - name: iscsi_tcp
+      - name: iscsi_generic
   kubelet:
     image: ghcr.io/siderolabs/kubelet:${kubernetes_version}
     ${indent(4, kubelet)}
