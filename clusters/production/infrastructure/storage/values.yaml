@@ -11,7 +11,7 @@ defaultSettings:
   backupTarget: ""
   backupTargetCredentialSecret: ""
   createDefaultDiskLabeledNodes: true
-  defaultDataPath: "/var/lib/longhorn"
+  defaultDataPath: "/var/mnt/longhorn"
   replicaSoftAntiAffinity: false
   storageOverProvisioningPercentage: "100"
   storageMinimalAvailablePercentage: "10"
