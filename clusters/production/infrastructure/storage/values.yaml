@@ -16,6 +16,28 @@ defaultSettings:
   storageOverProvisioningPercentage: "100"
   storageMinimalAvailablePercentage: "10"
   defaultReplicaCount: "1" # CRITICAL: Sets default to 1 for single proxmox node
+  guaranteedInstanceManagerCpu: "0"
+  taintToleration: ""
+  systemManagedComponentsNodeSelector: "node-role.kubernetes.io/worker:true"
+
+# Restrict to workers
+longhornManager:
+  nodeSelector:
+    node-role.kubernetes.io/worker: "true"
+
+longhornDriver:
+  nodeSelector:
+    node-role.kubernetes.io/worker: "true"
+
+longhornUI:
+  nodeSelector:
+    node-role.kubernetes.io/worker: "true"
+
+csi:
+  attacherReplicaCount: 1
+  provisionerReplicaCount: 1
+  resizerReplicaCount: 1
+  snapshotterReplicaCount: 1
 
 # Optional: Expose the UI
 # ingress:
