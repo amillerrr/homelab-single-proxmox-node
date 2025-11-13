@@ -107,6 +107,9 @@ helmCharts:
               revision: 1
               datasource: Prometheus
 
+        nodeSelector:
+          node-role.kubernetes.io/worker: "true"
+
       # Prometheus Configuration
       prometheus:
         enabled: true
@@ -142,6 +145,9 @@ helmCharts:
                 resources:
                   requests:
                     storage: 20Gi
+
+          nodeSelector:
+            node-role.kubernetes.io/worker: "true"
           
           # Service monitors selector
           serviceMonitorSelectorNilUsesHelmValues: false
