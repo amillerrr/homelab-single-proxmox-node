@@ -6,8 +6,6 @@ locals {
   # Everything else will be managed via bootstrap script + ArgoCD
   extra_manifests = concat(var.cluster.extra_manifests, [
     "https://github.com/kubernetes-sigs/gateway-api/releases/download/v${var.cluster.gateway_api_version}/standard-install.yaml",
-    "https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v${var.cluster.gateway_api_version}/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml",
-    "https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/charts/crds/crd-servicemonitors.yaml",
   ])
 }
 

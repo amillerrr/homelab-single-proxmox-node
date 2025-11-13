@@ -1,0 +1,94 @@
+# Prometheus Configuration
+prometheus:
+  prometheusSpec:
+    podMonitorNamespaceSelector: {}
+    podMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelector: {}
+    serviceMonitorNamespaceSelector: {}
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    
+    # Run on workers
+    nodeSelector:
+      node-role.kubernetes.io/worker: "true"
+    
+    # Storage
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: longhorn
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 20Gi
+    
+    # Retention
+    retention: 15d
+    retentionSize: "18GB"
+    
+    # Resources
+    resources:
+      requests:
+        cpu: 200m
+        memory: 1Gi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+
+# Talos-specific monitoring
+# https://github.com/siderolabs/talos/discussions/7214
+kubeControllerManager:
+  enabled: true
+  serviceMonitor:
+    relabelings:
+      - sourceLabels: [__meta_kubernetes_pod_node_name]
+        targetLabel: nodename
+        action: replace
+    metricRelabelings:
+      - action: labeldrop
+        regex: pod
+
+kubeEtcd:
+  enabled: true
+  service:
+    selector:
+      k8s-app: kube-controller-manager
+  serviceMonitor:
+    relabelings:
+      - sourceLabels: [__meta_kubernetes_pod_node_name]
+        targetLabel: nodename
+        action: replace
+    metricRelabelings:
+      - action: labeldrop
+        regex: pod
+
+kubeScheduler:
+  enabled: true
+  serviceMonitor:
+    relabelings:
+      - sourceLabels: [__meta_kubernetes_pod_node_name]
+        targetLabel: nodename
+        action: replace
+    metricRelabelings:
+      - action: labeldrop
+        regex: pod
+
+kubeProxy:
+  enabled: false  # Cilium replaces kube-proxy
+
+nodeExporter:
+  enabled: true
+
+# Grafana disabled (deploy separately later)
+grafana:
+  enabled: false
+
+# Disable Alertmanager for now
+alertmanager:
+  enabled: false
+
+# Prometheus Operator - disable webhooks temporarily
+prometheusOperator:
+  admissionWebhooks:
+    enabled: false
