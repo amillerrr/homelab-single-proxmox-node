@@ -52,19 +52,26 @@ data "talos_machine_configuration" "this" {
   # This is the Kubernetes API Server endpoint.
   # ref - https://www.talos.dev/latest/introduction/prodnotes/#decide-the-kubernetes-endpoint
   cluster_endpoint = "https://${local.kubernetes_endpoint}:6443"
-  # @formatter:off
   talos_version = var.cluster.talos_machine_config_version != null ? var.cluster.talos_machine_config_version : (each.value.update == true ? var.image.update_version : var.image.version)
-  # @formatter:on
   machine_type    = each.value.machine_type
   machine_secrets = talos_machine_secrets.this.machine_secrets
+
   config_patches = [
+    yamlencode({
+      machine = {
+        install = {
+          image = "factory.talos.dev/installer/${local.schematic_id}:${var.image.version}"
+        }
+      }
+    }),
     templatefile("${path.module}/machine-config/common.yaml.tftpl", {
       node_name          = each.value.host_node
       cluster_name       = var.cluster.proxmox_cluster
       kubernetes_version = var.cluster.kubernetes_version
       hostname           = each.key
       kubelet            = var.cluster.kubelet
-    }), each.value.machine_type == "controlplane" ?
+    }), 
+    each.value.machine_type == "controlplane" ?
     templatefile("${path.module}/machine-config/control-plane.yaml.tftpl", {
       ip               = each.value.ip
       mac_address      = lower(each.value.mac_address)
