@@ -91,4 +91,13 @@ alertmanager:
 # Prometheus Operator - disable webhooks temporarily
 prometheusOperator:
   admissionWebhooks:
-    enabled: false
+    enabled: true
+    patch:
+      enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
