@@ -12,10 +12,9 @@ helmCharts:
     version: 79.1.0
     releaseName: kube-prometheus-stack
     namespace: monitoring
-    includeCRDs: true
     valuesInline:
       crds:
-        enabled: true
+        enabled: false
 
       # Grafana Configuration
       grafana:

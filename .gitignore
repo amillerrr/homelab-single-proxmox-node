@@ -54,6 +54,7 @@ sealed-secrets-key-backup-*.yaml
 
 # Helper script
 vmshutdown.sh
+vmstop.sh
 
 # Logs
 crash.log
