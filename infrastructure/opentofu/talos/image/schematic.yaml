@@ -3,6 +3,6 @@ customization:
         officialExtensions:
             - siderolabs/i915
             - siderolabs/intel-ucode
-            - siderolabs/qemu-guest-agent
             - siderolabs/iscsi-tools
+            - siderolabs/qemu-guest-agent
             - siderolabs/util-linux-tools
