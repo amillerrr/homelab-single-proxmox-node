@@ -1,5 +1,6 @@
 # Prometheus Configuration
 prometheus:
+  enabled: true
   prometheusSpec:
     podMonitorNamespaceSelector: {}
     podMonitorSelectorNilUsesHelmValues: false
