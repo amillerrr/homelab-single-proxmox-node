@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: longhorn-system
 resources:
   - namespace.yaml
+  - cpu-setting.yaml
 
 helmCharts:
   - name: longhorn
