@@ -37,13 +37,23 @@ resource "proxmox_virtual_environment_vm" "this" {
     model = "virtio"
   }
 
+  disk {
+    datastore_id = "local-lvm"
+    interface    = "scsi0"
+    iothread     = true
+    cache        = "writethrough"
+    discard      = "on"
+    ssd          = true
+    file_format  = "raw"
+    size         = 32
+  }
 
   cdrom {
     file_id   = proxmox_virtual_environment_download_file.this["${each.value.host_node}_${each.value.update == true ? local.update_image_id : local.image_id}"].id
     interface = "ide2"
   }
 
-  boot_order = ["ide2"]
+  boot_order = ["ide2", "scsi0"]
 
   operating_system {
     type = "l26" # Linux Kernel 2.6 - 6.X.
