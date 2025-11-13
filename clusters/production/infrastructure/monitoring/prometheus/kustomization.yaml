@@ -16,99 +16,6 @@ helmCharts:
       crds:
         enabled: false
 
-      # Grafana Configuration
-      grafana:
-        enabled: true
-        adminPassword: "admin"          
-
-        # Resource limits for homelab
-        resources:
-          requests:
-            cpu: 100m
-            memory: 256Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
-        
-        # Persistence for dashboards
-        persistence:
-          enabled: true
-          size: 5Gi
-          storageClassName: longhorn
-        
-        # Service configuration
-        service:
-          type: ClusterIP
-          port: 80
-
-        sidecar:
-          datasources:
-            enabled: false
-          dashboards:
-            enabled: true
-        
-        # Pre-configured data sources
-        datasources:
-          datasources.yaml:
-            apiVersion: 1
-            datasources:
-              - name: Prometheus
-                type: prometheus
-                url: http://kube-prometheus-stack-prometheus:9090
-                access: proxy
-                isDefault: true
-              - name: Loki
-                type: loki
-                url: http://loki-stack-gateway.monitoring.svc:80
-                access: proxy
-                isDefault: false
-        
-        # Security context
-        securityContext:
-          runAsNonRoot: true
-          runAsUser: 65534
-          fsGroup: 65534
-        
-        # Default dashboards
-        dashboardProviders:
-          dashboardproviders.yaml:
-            apiVersion: 1
-            providers:
-              - name: 'default'
-                orgId: 1
-                folder: ''
-                type: file
-                disableDeletion: false
-                editable: true
-                options:
-                  path: /var/lib/grafana/dashboards/default
-        
-        # Import community dashboards
-        dashboards:
-          default:
-            # Kubernetes cluster monitoring
-            kubernetes-cluster:
-              gnetId: 7249
-              revision: 1
-              datasource: Prometheus
-            # Node exporter full
-            node-exporter:
-              gnetId: 1860
-              revision: 37
-              datasource: Prometheus
-            # Cilium metrics
-            cilium-metrics:
-              gnetId: 16611
-              revision: 1
-              datasource: Prometheus
-            # ArgoCD
-            argocd:
-              gnetId: 14584
-              revision: 1
-              datasource: Prometheus
-
-        nodeSelector:
-          node-role.kubernetes.io/worker: "true"
 
       # Prometheus Configuration
       prometheus:
@@ -172,54 +79,12 @@ helmCharts:
           #         replacement: '${1}:9100'
           #         target_label: __address__
 
-      # Alertmanager Configuration
+      grafana:
+        enabled: false
+
       alertmanager:
         enabled: false
         
-        # alertmanagerSpec:
-        #   # Resource limits
-        #   resources:
-        #     requests:
-        #       cpu: 10m
-        #       memory: 64Mi
-        #     limits:
-        #       cpu: 100m
-        #       memory: 128Mi
-        #   
-        #   # Storage
-        #   storage:
-        #     volumeClaimTemplate:
-        #       spec:
-        #         storageClassName: longhorn
-        #         accessModes: ["ReadWriteOnce"]
-        #         resources:
-        #           requests:
-        #             storage: 5Gi
-        #   
-        #   # Security context
-        #   securityContext:
-        #     runAsNonRoot: true
-        #     runAsUser: 65534
-        #     fsGroup: 65534
-        # 
-        # # Basic config - customize alerts routing here
-        # config:
-        #   global:
-        #     resolve_timeout: 5m
-        #   route:
-        #     group_by: ['alertname', 'cluster']
-        #     group_wait: 10s
-        #     group_interval: 10s
-        #     repeat_interval: 12h
-        #     receiver: 'null'
-        #     routes:
-        #       - match:
-        #           alertname: Watchdog
-        #         receiver: 'null'
-        #   receivers:
-        #     - name: 'null'
-          # Add your notification receivers here (email, slack, etc.)
-
       # Node Exporter
       nodeExporter:
         enabled: true
