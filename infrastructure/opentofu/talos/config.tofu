@@ -6,6 +6,7 @@ locals {
   # Everything else will be managed via bootstrap script + ArgoCD
   extra_manifests = concat(var.cluster.extra_manifests, [
     "https://github.com/kubernetes-sigs/gateway-api/releases/download/v${var.cluster.gateway_api_version}/standard-install.yaml",
+    "https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.86.2/stripped-down-crds.yaml",
   ])
 }
 
