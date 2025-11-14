@@ -10,7 +10,7 @@ preUpgradeChecker:
 defaultSettings:
   backupTarget: ""
   backupTargetCredentialSecret: ""
-  createDefaultDiskLabeledNodes: false
+  createDefaultDiskLabeledNodes: true
   defaultDataPath: "/var/mnt/longhorn"
   replicaSoftAntiAffinity: false
   storageOverProvisioningPercentage: "100"
