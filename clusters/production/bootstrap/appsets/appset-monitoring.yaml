@@ -61,6 +61,7 @@ spec:
           - ServerSideApply=true
           - SkipDryRunOnMissingResource=true
           - RespectIgnoreDifferences=true
+          - PruneLast=true
         retry:
           limit: 5
           backoff:
