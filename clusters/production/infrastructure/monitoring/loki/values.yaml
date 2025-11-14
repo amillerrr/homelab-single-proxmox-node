@@ -1,86 +1,58 @@
 loki:
-  enabled: true
-  deploymentMode: SingleBinary
   auth_enabled: false
-  
   commonConfig:
     path_prefix: /var/loki
     replication_factor: 1
-  
   storage:
     type: 'filesystem'
-    bucketNames:
-      chunks: chunks
-      ruler: ruler
-      admin: admin
     filesystem:
       chunks_directory: /var/loki/chunks
       rules_directory: /var/loki/rules
-  
   schemaConfig:
     configs:
-      - from: 2024-01-01
+      - from: "2024-04-01"
         store: tsdb
         object_store: filesystem
         schema: v13
         index:
           prefix: index_
           period: 24h
-  
   limits_config:
     retention_period: 168h
     reject_old_samples: true
     reject_old_samples_max_age: 168h
 
+singleBinary:
+  enabled: true
+  replicas: 1
   persistence:
     enabled: true
     size: 10Gi
     storageClass: longhorn
-  
-  singleBinary:
-    replicas: 1
-    persistence:
-      enabled: true
-      size: 10Gi
-      storageClass: longhorn
-    resources:
-      requests:
-        cpu: 100m
-        memory: 512Mi
-      limits:
-        cpu: 500m
-        memory: 1Gi
-    securityContext:
-      runAsNonRoot: true
-      runAsUser: 10001
-      fsGroup: 10001
-      readOnlyRootFilesystem: true
-    extraVolumes:
-      - name: tmp
-        emptyDir: {}
-    extraVolumeMounts:
-      - name: tmp
-        mountPath: /tmp
-  
-  gateway:
-    enabled: true
-    replicas: 1
-    resources:
-      requests:
-        cpu: 50m
-        memory: 64Mi
-      limits:
-        cpu: 100m
-        memory: 128Mi
-    service:
-      type: ClusterIP
-      port: 80
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    fsGroup: 10001
+    readOnlyRootFilesystem: true
+  extraVolumes:
+    - name: tmp
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: tmp
+      mountPath: /tmp
 
 promtail:
   enabled: true
   config:
     clients:
-      - url: http://loki-stack-gateway.monitoring.svc:80/loki/api/v1/push
+      - url: http://loki-stack.monitoring.svc:3100/loki/api/v1/push
     positions:
       filename: /tmp/positions.yaml
     scrape_configs:
@@ -128,6 +100,8 @@ promtail:
       operator: Exists
 
 # Explicitly disable scalable components for SingleBinary mode
+gateway:
+  enabled: false
 backend:
   replicas: 0
 read:
