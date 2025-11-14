@@ -88,3 +88,7 @@ spec:
           kind: ValidatingWebhookConfiguration
           jqPathExpressions:
             - .webhooks[].clientConfig.caBundle
+        - group: longhorn.io
+          kind: Setting
+          jsonPointers:
+            - /value
