@@ -1,5 +1,10 @@
 deploymentMode: SingleBinary
 
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+
 loki:
   auth_enabled: false
   commonConfig:
@@ -35,6 +40,8 @@ singleBinary:
     enabled: true
     size: 10Gi
     storageClass: longhorn
+  nodeSelector:
+    node-role.kubernetes.io/worker: "true"
   resources:
     requests:
       cpu: 100m
