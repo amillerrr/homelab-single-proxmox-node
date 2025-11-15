@@ -1,3 +1,5 @@
+deploymentMode: SingleBinary
+
 loki:
   auth_enabled: false
   commonConfig:
@@ -26,7 +28,6 @@ loki:
     reject_old_samples: true
     reject_old_samples_max_age: 168h
 
-deploymentMode: SingleBinary
 singleBinary:
   enabled: true
   replicas: 1
@@ -46,12 +47,6 @@ singleBinary:
     runAsUser: 10001
     fsGroup: 10001
     readOnlyRootFilesystem: true
-  extraVolumes:
-    - name: tmp
-      emptyDir: {}
-  extraVolumeMounts:
-    - name: tmp
-      mountPath: /tmp
 
 promtail:
   enabled: true
