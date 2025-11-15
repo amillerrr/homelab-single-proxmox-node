@@ -5,7 +5,7 @@ metadata:
   name: networking-components
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
