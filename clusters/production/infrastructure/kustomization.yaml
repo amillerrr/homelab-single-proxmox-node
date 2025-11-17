@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: argocd
 
 resources:
-  - network/kustomization.yaml
-  - controllers/kustomization.yaml
-  - storage/kustomization.yaml
-  - monitoring/kustomization.yaml
+  - network
+  - controllers
+  - storage
+  - monitoring
