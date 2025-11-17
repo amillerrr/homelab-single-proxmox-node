@@ -54,12 +54,3 @@ spec:
             duration: 5s
             factor: 2
             maxDuration: 3m
-      ignoreDifferences:
-        - group: cilium.io
-          kind: CiliumLoadBalancerIPPool
-          jqPathExpressions:
-            - .status
-        - group: cilium.io
-          kind: CiliumL2AnnouncementPolicy
-          jqPathExpressions:
-            - .status
