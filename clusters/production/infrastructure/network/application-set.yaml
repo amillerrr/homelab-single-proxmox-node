@@ -8,23 +8,17 @@ spec:
   generators:
     - list:
         elements:
-          # CNI (formerly in 'platform')
+          # CNI 
           - name: cilium
             path: infrastructure/network/cilium
             namespace: kube-system
             wave: "0"
           
-          # Gateway API (formerly in 'infrastructure/gateway')
+          # Gateway API 
           - name: gateway
             path: infrastructure/network/gateway
             namespace: gateway
             wave: "1"
-          
-          # Certificates (formerly in 'config/certificates')
-          - name: wildcard-certificate
-            path: infrastructure/network/certificates
-            namespace: gateway
-            wave: "2"
 
   template:
     metadata:

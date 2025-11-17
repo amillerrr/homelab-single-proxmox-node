@@ -17,6 +17,6 @@ helmCharts:
     includeCRDs: true
     valuesFile: values.yaml
 
-commonAnnotations:
+commonLabels:
   app.kubernetes.io/part-of: cert-manager
   app.kubernetes.io/managed-by: argocd

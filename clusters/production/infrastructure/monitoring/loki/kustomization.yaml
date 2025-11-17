@@ -11,6 +11,6 @@ helmCharts:
     namespace: monitoring
     valuesFile: values.yaml
 
-commonAnnotations:
-  app.kubernetes.io/part-of: monitoring-stack
+commonLabels:
+  app.kubernetes.io/part-of: monitoring
   app.kubernetes.io/managed-by: argocd

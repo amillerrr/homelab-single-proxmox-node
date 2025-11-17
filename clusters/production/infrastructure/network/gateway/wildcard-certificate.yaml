@@ -12,5 +12,5 @@ spec:
     - "*.mill3r.la"
     - mill3r.la
   privateKey:
-    algorithm: RSA
-    size: 2048
+    algorithm: ECDSA
+    size: 256

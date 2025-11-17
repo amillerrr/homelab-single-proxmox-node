@@ -5,6 +5,9 @@ metadata:
   namespace: gateway
 spec:
   gatewayClassName: cilium
+  infrastructure:
+    labels:
+      l2.cilium.io/ip-pool: first-pool
   addresses:
     - type: IPAddress
       value: 10.0.70.150
@@ -40,14 +43,6 @@ spec:
       port: 80
       name: http-redirect
       hostname: "*.mill3r.la"
-      allowedRoutes:
-        namespaces:
-          from: All
-    
-    - protocol: HTTP
-      port: 80
-      name: http-redirect-apex
-      hostname: mill3r.la
       allowedRoutes:
         namespaces:
           from: All

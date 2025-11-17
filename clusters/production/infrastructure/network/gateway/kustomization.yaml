@@ -6,8 +6,9 @@ namespace: gateway
 resources:
   - gateway-class.yaml
   - gateway-external.yaml
-  # - gateway-internal.yaml not yet referenced by HTTPRoutes
+  - gateway-internal.yaml 
+  - wildcard-certificate.yaml
 
-commonAnnotations:
+commonLabels:
   app.kubernetes.io/part-of: gateway
   app.kubernetes.io/managed-by: argocd

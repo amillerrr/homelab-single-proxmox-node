@@ -7,5 +7,5 @@ resources:
   - nginx-route.yaml
   - deployment.yaml
 
-commonAnnotations:
+commonLabels:
   app.kubernetes.io/managed-by: argocd
