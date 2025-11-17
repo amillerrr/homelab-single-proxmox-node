@@ -5,7 +5,6 @@ namespace: monitoring
 
 resources:
   - prometheus-route.yaml
-  - alertmanager-route.yaml
 
 commonAnnotations:
   app.kubernetes.io/part-of: monitoring-stack
