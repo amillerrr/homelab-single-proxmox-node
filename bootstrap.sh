@@ -105,7 +105,7 @@ install_argocd() {
       kubectl create namespace argocd
   fi
   
-  if ! kubectl apply -k clusters/production/infrastructure/argocd/; then
+  if ! kubectl kustomize clusters/production/infrastructure/argocd/ --enable-helm | kubectl apply -f -; then
       log_error "Failed to apply ArgoCD Kustomization"
       exit 1
   fi

@@ -12,5 +12,5 @@ helmCharts:
     includeCRDs: true
     valuesFile: values.yaml 
 
-resources:
-  - values.yaml
+# resources:
+#   - values.yaml
