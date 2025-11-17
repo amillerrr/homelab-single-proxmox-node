@@ -43,8 +43,11 @@ kubeControllerManager:
   enabled: true
   serviceMonitor:
     relabelings:
-      - sourceLabels: [__meta_kubernetes_pod_node_name]
+      - sourceLabels: [ __meta_kubernetes_pod_node_name ]
+        separator: ;
+        regex: ^(.*)$
         targetLabel: nodename
+        replacement: $1
         action: replace
     metricRelabelings:
       - action: labeldrop
@@ -57,8 +60,11 @@ kubeEtcd:
       k8s-app: kube-controller-manager
   serviceMonitor:
     relabelings:
-      - sourceLabels: [__meta_kubernetes_pod_node_name]
+      - sourceLabels: [ __meta_kubernetes_pod_node_name ]
+        separator: ;
+        regex: ^(.*)$
         targetLabel: nodename
+        replacement: $1
         action: replace
     metricRelabelings:
       - action: labeldrop
@@ -68,8 +74,11 @@ kubeScheduler:
   enabled: true
   serviceMonitor:
     relabelings:
-      - sourceLabels: [__meta_kubernetes_pod_node_name]
+      - sourceLabels: [ __meta_kubernetes_pod_node_name ]
+        separator: ;
+        regex: ^(.*)$
         targetLabel: nodename
+        replacement: $1
         action: replace
     metricRelabelings:
       - action: labeldrop
@@ -90,15 +99,15 @@ alertmanager:
   enabled: false
 
 # Prometheus Operator - disable webhooks temporarily
-prometheusOperator:
-  admissionWebhooks:
-    enabled: true
-    patch:
-      enabled: false
-  resources:
-    requests:
-      cpu: 50m
-      memory: 128Mi
-    limits:
-      cpu: 200m
-      memory: 256Mi
+# prometheusOperator:
+#   admissionWebhooks:
+#     enabled: true
+#     patch:
+#       enabled: false
+#   resources:
+#     requests:
+#       cpu: 50m
+#       memory: 128Mi
+#     limits:
+#       cpu: 200m
+#       memory: 256Mi
