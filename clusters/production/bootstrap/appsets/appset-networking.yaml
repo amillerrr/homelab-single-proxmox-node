@@ -24,12 +24,6 @@ spec:
             wave: "1"
             description: "Cilium Gateway API resources (GatewayClass, Gateways)"
           
-          - name: routes
-            path: config/routes
-            namespace: default
-            wave: "2"
-            description: "HTTPRoutes for application ingress"
-  
   template:
     metadata:
       name: "{{.name}}"
