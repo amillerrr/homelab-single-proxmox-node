@@ -4,6 +4,7 @@ kind: Kustomization
 namespace: gateway
 
 resources:
+  - namespace.yaml
   - gateway-class.yaml
   - gateway-external.yaml
   - gateway-internal.yaml 
