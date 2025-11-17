@@ -51,10 +51,8 @@ spec:
           selfHeal: true
           allowEmpty: false
         syncOptions:
-          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
           - ServerSideApply=true
-          - SkipDryRunOnMissingResource=true
-          - RespectIgnoreDifferences=true
         retry:
           limit: 5
           backoff:
