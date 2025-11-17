@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: monitoring
+  namespace: argocd
+spec:
+  description: Observability stack (Prometheus, Grafana, Loki)
+  sourceRepos:
+    - '*'
+  destinations:
+    - namespace: 'monitoring'
+      server: '*'
+    # Allow Gateway namespace if you put routes there, otherwise 'monitoring' is enough
+    - namespace: 'gateway' 
+      server: '*'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'

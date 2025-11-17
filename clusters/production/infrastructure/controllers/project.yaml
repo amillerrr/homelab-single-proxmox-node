@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: controllers
+  namespace: argocd
+spec:
+  description: Core cluster controllers (ArgoCD, Cert-Manager, Secrets)
+  sourceRepos:
+    - '*'
+  destinations:
+    - namespace: 'argocd'
+      server: '*'
+    - namespace: 'sealed-secrets'
+      server: '*'
+    - namespace: 'cert-manager'
+      server: '*'
+    - namespace: 'kube-system' # Required for Cert-Manager RBAC
+      server: '*'
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'

@@ -1,0 +1,43 @@
+# https://github.com/cert-manager/cert-manager/blob/master/deploy/charts/cert-manager/values.yaml
+
+# CRITICAL: This allows cert-manager to perform leader election inside its own namespace.
+# This removes the requirement for the 'cert-manager-rbac' stack in kube-system.
+global:
+  leaderElection:
+    namespace: "cert-manager"
+
+installCRDs: true
+
+extraArgs:
+  - "--enable-gateway-api"
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 10m
+    memory: 64Mi
+
+webhook:
+  resources:
+    limits:
+      cpu: 100m
+      memory: 64Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
+
+cainjector:
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
+
+prometheus:
+  enabled: true
+  servicemonitor:
+    enabled: true

@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: network
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - list:
+        elements:
+          # CNI (formerly in 'platform')
+          - name: cilium
+            path: infrastructure/network/cilium
+            namespace: kube-system
+            wave: "0"
+          
+          # Gateway API (formerly in 'infrastructure/gateway')
+          - name: gateway
+            path: infrastructure/network/gateway
+            namespace: gateway
+            wave: "1"
+          
+          # Certificates (formerly in 'config/certificates')
+          - name: wildcard-certificate
+            path: infrastructure/network/certificates
+            namespace: gateway
+            wave: "2"
+
+  template:
+    metadata:
+      name: '{{.name}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{.wave}}'
+      labels:
+        dev.homelab.stack: network
+    spec:
+      project: network
+      source:
+        repoURL: https://github.com/amillerrr/homelab-single-proxmox-node.git
+        targetRevision: main
+        path: 'clusters/production/{{.path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{.namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true

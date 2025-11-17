@@ -1,11 +1,8 @@
----
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: bootstrap
+  name: applications-stack
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -13,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/amillerrr/homelab-single-proxmox-node.git
     targetRevision: main
-    path: clusters/production/sets
+    path: clusters/production/apps
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
@@ -21,13 +18,6 @@ spec:
     automated:
       prune: true
       selfHeal: true
-      allowEmpty: false
     syncOptions:
-      - CreateNamespace=true
       - ServerSideApply=true
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m
+      - CreateNamespace=true

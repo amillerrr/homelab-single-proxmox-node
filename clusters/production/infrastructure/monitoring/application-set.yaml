@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: monitoring
+  namespace: argocd
+  annotations:
+    # Keep this wave to ensure monitoring deploys after networking/storage
+    argocd.argoproj.io/sync-wave: "4" 
+spec:
+  goTemplate: true
+  generators:
+    - list:
+        elements:
+          - name: kube-prometheus-stack
+            path: infrastructure/monitoring/prometheus
+            namespace: monitoring
+            wave: "0"
+          
+          - name: loki-stack
+            path: infrastructure/monitoring/loki
+            namespace: monitoring
+            wave: "1"
+
+  template:
+    metadata:
+      name: '{{.name}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{.wave}}'
+      labels:
+        dev.homelab.stack: monitoring
+    spec:
+      project: monitoring
+      source:
+        repoURL: https://github.com/amillerrr/homelab-single-proxmox-node.git
+        targetRevision: main
+        path: 'clusters/production/{{.path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{.namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true

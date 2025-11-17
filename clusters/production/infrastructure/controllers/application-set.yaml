@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: controllers
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - list:
+        elements:
+          - name: argocd
+            path: infrastructure/controllers/argocd
+            namespace: argocd
+            wave: "0"
+          
+          - name: sealed-secrets
+            path: infrastructure/controllers/sealed-secrets
+            namespace: sealed-secrets
+            wave: "1"
+          
+          - name: cert-manager
+            path: infrastructure/controllers/cert-manager
+            namespace: cert-manager
+            wave: "2"
+
+  template:
+    metadata:
+      name: '{{.name}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{.wave}}'
+      labels:
+        dev.homelab.stack: controllers
+    spec:
+      project: controllers
+      source:
+        repoURL: https://github.com/amillerrr/homelab-single-proxmox-node.git
+        targetRevision: main
+        path: 'clusters/production/{{.path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{.namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true

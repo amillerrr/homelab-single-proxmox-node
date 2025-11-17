@@ -7,6 +7,15 @@ resources:
   - cloudflare-token-sealed.yaml
   - cluster-issuer.yaml
 
+helmCharts:
+  - name: cert-manager
+    repo: https://charts.jetstack.io
+    version: v1.18.2
+    releaseName: cert-manager
+    namespace: cert-manager
+    includeCRDs: true
+    valuesFile: values.yaml
+
 commonAnnotations:
   app.kubernetes.io/part-of: cert-manager
   app.kubernetes.io/managed-by: argocd

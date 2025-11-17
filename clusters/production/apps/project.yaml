@@ -1,28 +1,23 @@
----
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
   name: applications
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   description: User applications and workloads
-  
   sourceRepos:
-    - 'https://github.com/amillerrr/homelab-single-proxmox-node.git'
-    - '*'  # Allow any Helm chart repository for flexibility
-  
+    - '*'
   destinations:
+    # Allow deployment to 'default' and any 'apps-*' namespace
     - namespace: 'default'
       server: '*'
-    - namespace: 'apps-*'  # Allow any namespace starting with apps-
+    - namespace: 'apps-*'
       server: '*'
-  
+  # Deny access to cluster-level resources (CRDs, ClusterRoles) by default
+  # Only allow specific safe resources if needed
   clusterResourceWhitelist:
     - group: 'gateway.networking.k8s.io'
       kind: 'HTTPRoute'
-  
   namespaceResourceWhitelist:
     - group: '*'
       kind: '*'
