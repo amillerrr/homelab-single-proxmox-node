@@ -12,34 +12,40 @@ spec:
   generators:
     - list:
         elements:
+          - name: argocd
+            path: infrastructure/argocd
+            namespace: argocd
+            wave: "0" # Give it a negative wave to ensure it syncs first
+            description: "ArgoCD: Self-managing installation"
+
           - name: sealed-secrets
             path: infrastructure/sealed-secrets
             namespace: sealed-secrets
-            wave: "0"
+            wave: "1"
             description: "Bitnami Sealed Secrets for secret encryption"
           
           - name: cert-manager
             path: infrastructure/cert-manager
             namespace: cert-manager
-            wave: "1"
+            wave: "2"
             description: "Jetstack cert-manager for certificate management"
 
           - name: cert-manager-rbac
             path: infrastructure/cert-manager-rbac
             namespace: kube-system
-            wave: "2"
+            wave: "3"
             description: "RBAC prerequisites for cert-manager (leader election)"
           
           - name: cert-manager-config
             path: config/cert-manager
             namespace: cert-manager
-            wave: "3"
+            wave: "4"
             description: "Cert-manager ClusterIssuer and API tokens"
 
           - name: longhorn
             path: infrastructure/storage
             namespace: longhorn-system
-            wave: "4"
+            wave: "5"
             description: "Longhorn Storage Provisioner"
   
   template:
