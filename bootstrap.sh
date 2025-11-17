@@ -105,7 +105,7 @@ install_argocd() {
       kubectl create namespace argocd
   fi
   
-  if ! kubectl kustomize clusters/production/infrastructure/argocd/ --enable-helm | kubectl apply -f -; then
+  if ! kubectl kustomize clusters/production/infrastructure/controllers/argocd/ --enable-helm | kubectl apply -f -; then
       log_error "Failed to apply ArgoCD Kustomization"
       exit 1
   fi
@@ -119,39 +119,6 @@ install_argocd() {
   fi
   
   log_success "ArgoCD bootstrapped"
-}
-
-# Deploy ApplicationSets
-deploy_appprojects() {
-   log_info "Deploying ArgoCD AppProjects..."
-    
-  # Wait for ArgoCD to be ready
-  if ! kubectl wait --for=condition=available deployment/argocd-server \
-      -n argocd \
-      --timeout=120s 2>/dev/null; then
-      log_warn "ArgoCD server not fully ready, but continuing..."
-  fi
-  
-  # Apply AppProjects
-  local projects=(
-      "clusters/production/infrastructure/argocd/appproject-infrastructure.yaml"
-      "clusters/production/infrastructure/argocd/appproject-monitoring.yaml"
-      "clusters/production/infrastructure/argocd/appproject-platform.yaml"
-      "clusters/production/infrastructure/argocd/appproject-applications.yaml"
-  )
-  
-  for project in "${projects[@]}"; do
-      if [ -f "$project" ]; then
-          if ! kubectl apply -f "$project"; then
-              log_error "Failed to apply $project"
-              exit 1
-          fi
-      else
-          log_warn "Project file not found: $project (skipping)"
-      fi
-  done
-  
-  log_success "AppProjects deployed" 
 }
 
 # Deploy root Application (App of AppSets)
@@ -214,7 +181,6 @@ main() {
   wait_for_cilium
   label_worker_nodes
   install_argocd
-  deploy_appprojects
   deploy_root_application
   
   show_next_steps
