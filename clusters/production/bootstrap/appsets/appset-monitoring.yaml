@@ -77,8 +77,13 @@ spec:
           kind: StatefulSet
           jsonPointers:
             - /spec/replicas
+            - /status
         - group: ""
           kind: PersistentVolumeClaim
+          jqPathExpressions:
+            - .status
+        - group: monitoring.coreos.com
+          kind: Prometheus
           jqPathExpressions:
             - .status
         - group: gateway.networking.k8s.io
