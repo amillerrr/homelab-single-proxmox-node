@@ -71,3 +71,4 @@ spec:
           kind: HTTPRoute
           jqPathExpressions:
             - .status
+            - .metadata.generation

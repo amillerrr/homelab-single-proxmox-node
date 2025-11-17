@@ -77,13 +77,32 @@ spec:
           kind: StatefulSet
           jsonPointers:
             - /spec/replicas
-            - /status
+          jqPathExpressions:
+            - .status
         - group: ""
           kind: PersistentVolumeClaim
           jqPathExpressions:
             - .status
+        - group: admissionregistration.k8s.io
+          kind: MutatingWebhookConfiguration
+          jqPathExpressions:
+            - .webhooks[].clientConfig.caBundle
+            - .metadata.generation
+        - group: admissionregistration.k8s.io
+          kind: ValidatingWebhookConfiguration
+          jqPathExpressions:
+            - .webhooks[].clientConfig.caBundle
+            - .metadata.generation
         - group: monitoring.coreos.com
           kind: Prometheus
+          jqPathExpressions:
+            - .status
+        - group: monitoring.coreos.com
+          kind: PrometheusRule
+          jqPathExpressions:
+            - .status
+        - group: monitoring.coreos.com
+          kind: ServiceMonitor
           jqPathExpressions:
             - .status
         - group: gateway.networking.k8s.io

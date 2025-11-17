@@ -66,10 +66,12 @@ spec:
           kind: Gateway
           jqPathExpressions:
             - .status
+            - .metadata.generation
         - group: gateway.networking.k8s.io
           kind: HTTPRoute
           jqPathExpressions:
             - .status
+            - .metadata.generation
         - group: cert-manager.io
           kind: Certificate
           jqPathExpressions:
