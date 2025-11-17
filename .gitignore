@@ -70,6 +70,7 @@ Thumbs.db
 
 # Helm
 charts/*.tgz
+**/charts/
 
 # Build artifacts
 *.qcow2
