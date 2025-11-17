@@ -6,6 +6,7 @@ namespace: cert-manager
 resources:
   - cloudflare-token-sealed.yaml
   - cluster-issuer.yaml
+  - namespace.yaml
 
 helmCharts:
   - name: cert-manager
