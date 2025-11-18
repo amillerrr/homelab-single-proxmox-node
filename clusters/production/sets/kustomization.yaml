@@ -5,6 +5,3 @@ namespace: argocd
 resources:
   - infrastructure.yaml
   - applications.yaml
-
-commonAnnotations:
-  argocd.argoproj.io/sync-wave: "-1"

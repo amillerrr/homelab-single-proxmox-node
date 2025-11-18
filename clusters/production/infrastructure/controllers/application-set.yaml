@@ -3,27 +3,25 @@ kind: ApplicationSet
 metadata:
   name: controllers
   namespace: argocd
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
 spec:
   goTemplate: true
   generators:
     - list:
         elements:
-          - name: argocd
-            path: infrastructure/controllers/argocd
-            namespace: argocd
-            wave: "0"
+          # - name: argocd
+          #   path: infrastructure/controllers/argocd
+          #   namespace: argocd
+          #   wave: "0"
           
           - name: sealed-secrets
             path: infrastructure/controllers/sealed-secrets
             namespace: sealed-secrets
-            wave: "1"
+            wave: "0"
           
           - name: cert-manager
             path: infrastructure/controllers/cert-manager
             namespace: cert-manager
-            wave: "2"
+            wave: "1"
 
   template:
     metadata:

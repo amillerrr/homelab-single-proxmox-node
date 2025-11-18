@@ -3,9 +3,6 @@ kind: ApplicationSet
 metadata:
   name: monitoring
   namespace: argocd
-  annotations:
-    # Keep this wave to ensure monitoring deploys after networking/storage
-    argocd.argoproj.io/sync-wave: "4" 
 spec:
   goTemplate: true
   generators:
