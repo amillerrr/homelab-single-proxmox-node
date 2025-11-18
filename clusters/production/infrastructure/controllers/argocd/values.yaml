@@ -15,8 +15,6 @@ controller:
 server:
   service:
     type: ClusterIP
-  
-  # Resource limits
   resources:
     requests:
       cpu: 50m
@@ -24,15 +22,11 @@ server:
     limits:
       cpu: 200m
       memory: 256Mi
-  
   # Enable insecure mode (no TLS, using Gateway for TLS termination)
   insecure: true
-  
-  # Extra args
   extraArgs:
     - --application-namespaces=*
 
-# Repo Server - with Helm support
 repoServer:
   resources:
     requests:
@@ -41,14 +35,44 @@ repoServer:
     limits:
       cpu: 500m
       memory: 512Mi
+  # Volumes needed for the sidecar and plugin configuration
+  volumes:
+    - name: plugins
+      emptyDir: {}
+    - name: cmp-config
+      configMap:
+        name: argocd-cmp-cm
+        items:
+          - key: kustomize-build-with-helm.yaml
+            path: kustomize-build-with-helm.yaml
+    - name: argocd-tmp
+      emptyDir: {}
+  # Container definition for the Custom Config Management Plugin (CMP)
+  extraContainers:
+    - name: kustomize-build-with-helm
+      command: [ /var/run/argocd/argocd-cmp-server ]
+      # Use a standard image that includes Kustomize and Helm
+      image: ghcr.io/argoproj-labs/argocd-helm-client:v0.1.0 
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        seccompProfile:
+          type: RuntimeDefault
+        capabilities:
+          drop: [ ALL ]
+      volumeMounts:
+        - mountPath: /var/run/argocd
+          name: argocd-cmp-server
+        - mountPath: /home/argocd/cmp-server/config/plugin.yaml
+          name: cmp-config
+          subPath: kustomize-build-with-helm.yaml
+        - mountPath: /home/argocd/cmp-server/plugins
+          name: plugins
+        - mountPath: /tmp
+          name: argocd-tmp
   
-  # Enable Helm charts in kustomize
-  env:
-    - name: KUSTOMIZE_PLUGIN_HOME
-      value: /usr/local/bin/kustomize/plugin
-    - name: ARGOCD_EXEC_TIMEOUT
-      value: "180"
-
 # ApplicationSet Controller
 applicationSet:
   resources:
@@ -94,9 +118,17 @@ configs:
     # Timeout for sync operations
     timeout.reconciliation: 180s
     application.sync.options: "ServerSideApply=true"
-  
+  # Custom Config Management Plugin
+  cmp:
+    create: true
+    plugins:
+      kustomize-build-with-helm:
+        generate:
+          command: [ sh, -c ]
+          args: [ kustomize build --enable-helm ]
   # Params
   params:
+    controller.diff.server.side: true
     server.insecure: true
     application.namespaces: "*"
     # ApplicationSet controller
