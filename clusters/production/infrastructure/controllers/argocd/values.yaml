@@ -37,7 +37,7 @@ repoServer:
       memory: 512Mi
   # Volumes needed for the sidecar and plugin configuration
   volumes:
-    - name: plugins
+    - name: argocd-cmp-server
       emptyDir: {}
     - name: cmp-config
       configMap:
