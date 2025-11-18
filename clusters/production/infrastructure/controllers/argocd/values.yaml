@@ -52,7 +52,7 @@ repoServer:
     - name: kustomize-build-with-helm
       command: [ /var/run/argocd/argocd-cmp-server ]
       # Use a standard image that includes Kustomize and Helm
-      image: ghcr.io/argoproj-labs/argocd-helm-client:v0.1.0 
+      image: quay.io/argoproj/argocd:v3.2.0
       securityContext:
         runAsNonRoot: true
         runAsUser: 999
