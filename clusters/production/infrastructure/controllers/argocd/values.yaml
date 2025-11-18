@@ -89,25 +89,24 @@ configs:
   cm:
     kustomize.buildOptions: "--enable-helm --load-restrictor LoadRestrictionsNone"
     application.namespaces: "*"
-    
     # Resource tracking method
     application.resourceTrackingMethod: annotation
-    
     # Timeout for sync operations
     timeout.reconciliation: 180s
+    application.sync.options: "ServerSideApply=true"
   
   # Params
   params:
     server.insecure: true
     application.namespaces: "*"
-    
     # ApplicationSet controller
     applicationsetcontroller.enable.progressive.syncs: true
-    
     # Controller
     controller.status.processors: 20
     controller.operation.processors: 10
     controller.self.heal.timeout.seconds: 5
+    application.diff.strategy: "structured-merge-diff"
+
   
   # RBAC policies
   rbac:
