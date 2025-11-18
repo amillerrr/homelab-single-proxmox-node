@@ -3,6 +3,8 @@ kind: ApplicationSet
 metadata:
   name: storage
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   goTemplate: true
   generators:
@@ -11,7 +13,7 @@ spec:
           - name: longhorn
             path: infrastructure/storage/longhorn
             namespace: longhorn-system
-            wave: "5"
+            wave: "0"
 
   template:
     metadata:
