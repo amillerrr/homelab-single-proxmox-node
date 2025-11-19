@@ -7,7 +7,7 @@ resource "helm_release" "argocd" {
   chart            = "argo-cd"
   namespace        = "argocd"
   create_namespace = true
-  version          = "5.51.6" # Pinned for stability
+  version          = "8.5.10"
 
   # Reuse your existing GitOps values file
   values = [
