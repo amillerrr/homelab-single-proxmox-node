@@ -9,3 +9,5 @@ machine:
           - network: 0.0.0.0/0
             gateway: ${gateway}
         dhcp: false
+  nodeLabels:
+    node-role.kubernetes.io/worker: "true"
