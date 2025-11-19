@@ -9,13 +9,21 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Helper functions
-log_info() { echo -e "${BLUE}ℹ${NC} $1" }
+log_info() {
+  echo -e "${BLUE}ℹ${NC} $1"
+}
 
-log_success() { echo -e "${GREEN}✓${NC} $1" }
+log_success() {
+  echo -e "${GREEN}✓${NC} $1"
+}
 
-log_warn() { echo -e "${YELLOW}⚠${NC} $1" }
+log_warn() {
+  echo -e "${YELLOW}⚠${NC} $1"
+}
 
-log_error() { echo -e "${RED}✗${NC} $1" }
+log_error() {
+  echo -e "${RED}✗${NC} $1"
+}
 
 # Check prerequisites
 check_prerequisites() {
@@ -130,57 +138,20 @@ deploy_root_application() {
   log_info "ArgoCD is now self-managing"
 }
 
-wait_for_argocd() {
-  log_info "Verifying ArgoCD availability..."
-  
-  # Wait for the server deployment to be available
-  if ! kubectl wait --for=condition=available deployment/argocd-server \
-      -n argocd \
-      --timeout=300s 2>/dev/null; then
-      log_error "ArgoCD server is not ready yet. Check pods with: kubectl get pods -n argocd"
-      exit 1
-  fi
-  
-  log_success "ArgoCD is running"
-}
-
 # Get ArgoCD credentials
 show_argocd_credentials() {
   echo ""
   log_info "ArgoCD Credentials:"
-  
-  # Check if the secret exists first
-  if kubectl get secret argocd-initial-admin-secret -n argocd &> /dev/null; then
-      echo "  Username: admin"
-      echo -n "  Password: "
-      kubectl -n argocd get secret argocd-initial-admin-secret \
-          -o jsonpath="{.data.password}" | base64 -d
-      echo ""
-  else
-      log_warn "ArgoCD initial admin secret not found. (Did you change the password or delete the secret?)"
-  fi
-
+  echo "  Username: admin"
+  echo -n "  Password: "
+  kubectl -n argocd get secret argocd-initial-admin-secret \
+      -o jsonpath="{.data.password}" | base64 -d && echo
+  echo ""
   echo ""
   log_info "Access ArgoCD:"
-  # dynamically get the IP if possible, otherwise generic instructions
-  local argo_ip
-  argo_ip=$(kubectl get svc argocd-server -n argocd -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || echo "")
-  
-  if [ -n "$argo_ip" ]; then
-      echo "  URL: https://${argo_ip}"
-  else
-      echo "  Port Forward: kubectl port-forward -n argocd svc/argocd-server 8080:443"
-      echo "  URL: https://localhost:8080"
-  fi
+  echo "  kubectl port-forward -n argocd svc/argocd-server 8080:443"
+  echo "  Then visit: https://localhost:8080"
   echo ""
-}
-
-show_status() {
-  log_info "Cluster Status:"
-  echo "  Nodes: $(kubectl get nodes --no-headers | wc -l) detected"
-  echo "  Apps:  $(kubectl get applications -n argocd --no-headers 2>/dev/null | wc -l) GitOps apps managed"
-  echo ""
-  log_success "Deployment Verification Complete!"
 }
 
 # Summarize next steps
@@ -206,11 +177,14 @@ main() {
   echo ""
   
   check_prerequisites
-  wait_for_argocd
+  wait_for_cluster
+  wait_for_cilium
+  label_worker_nodes
+  install_argocd
+  deploy_root_application
   
-  show_argocd_credentials
-  show_status
   show_next_steps
+  show_argocd_credentials
 }
 
 # Run main function
