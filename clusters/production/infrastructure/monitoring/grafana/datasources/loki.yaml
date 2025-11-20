@@ -1,0 +1,17 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDatasource
+metadata:
+  name: loki
+  namespace: monitoring
+spec:
+  instanceSelector:
+    matchLabels:
+      app: grafana
+  datasource:
+    name: Loki
+    type: loki
+    access: proxy
+    # Assumes your release name is 'loki-stack' and namespace is 'monitoring'
+    url: http://loki-stack.monitoring.svc.cluster.local:3100
+    jsonData:
+      maxLines: 1000

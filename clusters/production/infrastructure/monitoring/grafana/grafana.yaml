@@ -1,0 +1,24 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: grafana
+  namespace: monitoring
+  labels:
+    app: grafana
+spec:
+  config:
+    log:
+      mode: console
+    server:
+      root_url: https://grafana.mill3r.la
+  deployment:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: grafana
+              resources:
+                limits:
+                  memory: 512Mi
+                requests:
+                  memory: 128Mi
