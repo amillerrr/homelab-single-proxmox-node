@@ -52,12 +52,11 @@ jobs:
         uses: fluxcd/pkg/actions/kustomize@main
 
       - name: Setup Kubeconform
-        # Kubeconform validates resources against the official K8s schema
-        uses: yannh/kubeconform-action@v1
-        with:
-          kubernetes_version: "1.34.0" # Match cluster version
-          strict: true
-          ignore_missing_schemas: true
+        run: |
+          # Download kubeconform binary explicitly
+          curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.4/kubeconform-linux-amd64.tar.gz | tar xvz
+          sudo mv kubeconform /usr/local/bin/
+          chmod +x /usr/local/bin/kubeconform
 
       - name: Validate Production Cluster
         run: |
@@ -69,7 +68,7 @@ jobs:
             -summary \
             -ignore-missing-schemas \
             -verbose \
-            -skip CustomResourceDefinition,AppProject,Application,ApplicationSet,SealedSecret,Certificate,ClusterIssuer,Gateway,HTTPRoute,CiliumLoadBalancerIPPool
+            -skip CustomResourceDefinition,AppProject,Application,ApplicationSet,SealedSecret,Certificate,ClusterIssuer,Gateway,HTTPRoute,CiliumLoadBalancerIPPool,CiliumL2AnnouncementPolicy
 
   # 3. Script Linting (Shellcheck)
   script-lint:

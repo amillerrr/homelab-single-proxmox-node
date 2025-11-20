@@ -1,7 +1,7 @@
 locals {
   first_control_plane_node_ip = [for k, v in var.nodes : v.ip if v.machine_type == "controlplane"][0]
   kubernetes_endpoint         = coalesce(var.cluster.vip, local.first_control_plane_node_ip)
-  
+
   # Only include Gateway API CRDs as extra manifests
   # Everything else will be managed via bootstrap script + ArgoCD
   extra_manifests = concat(var.cluster.extra_manifests, [
@@ -53,9 +53,9 @@ data "talos_machine_configuration" "this" {
   # This is the Kubernetes API Server endpoint.
   # ref - https://www.talos.dev/latest/introduction/prodnotes/#decide-the-kubernetes-endpoint
   cluster_endpoint = "https://${local.kubernetes_endpoint}:6443"
-  talos_version = var.cluster.talos_machine_config_version != null ? var.cluster.talos_machine_config_version : (each.value.update == true ? var.image.update_version : var.image.version)
-  machine_type    = each.value.machine_type
-  machine_secrets = talos_machine_secrets.this.machine_secrets
+  talos_version    = var.cluster.talos_machine_config_version != null ? var.cluster.talos_machine_config_version : (each.value.update == true ? var.image.update_version : var.image.version)
+  machine_type     = each.value.machine_type
+  machine_secrets  = talos_machine_secrets.this.machine_secrets
 
   config_patches = [
     yamlencode({
@@ -71,7 +71,7 @@ data "talos_machine_configuration" "this" {
       kubernetes_version = var.cluster.kubernetes_version
       hostname           = each.key
       kubelet            = var.cluster.kubelet
-    }), 
+    }),
     each.value.machine_type == "controlplane" ?
     templatefile("${path.module}/machine-config/control-plane.yaml.tftpl", {
       ip               = each.value.ip

@@ -34,7 +34,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   network_device {
     bridge      = "vmbr0"
     mac_address = each.value.mac_address
-    model = "virtio"
+    model       = "virtio"
   }
 
   disk {

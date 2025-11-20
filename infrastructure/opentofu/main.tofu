@@ -1,6 +1,6 @@
 terraform {
   required_version = ">= 1.0"
-  
+
   backend "s3" {
     bucket = "homelab-proxmox-statefile"
     key    = "single-node/k8s-cluster/terraform.tfstate"
@@ -15,7 +15,7 @@ module "talos_cluster" {
     proxmox = proxmox
   }
 
-  image = var.talos_image
+  image   = var.talos_image
   cluster = var.talos_cluster_config
-  nodes = var.talos_nodes
+  nodes   = var.talos_nodes
 }
