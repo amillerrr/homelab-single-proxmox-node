@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: monitoring
 
 resources:
-  - grafana-instance.yaml
+  - grafana.yaml
   - datasources/prometheus.yaml
   - datasources/loki.yaml
   - grafana-route.yaml
