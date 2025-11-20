@@ -9,6 +9,12 @@ variable "proxmox" {
   })
 }
 
+variable "proxmox_ssh_key_path" {
+  description = "Path to the SSH private key for Proxmox"
+  type        = string
+  default     = "~/.ssh/proxmox"
+}
+
 variable "proxmox_api_token" {
   description = "API token for Proxmox"
   type        = string

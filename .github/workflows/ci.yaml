@@ -53,17 +53,27 @@ jobs:
 
       - name: Setup Kubeconform
         run: |
-          # Download kubeconform binary explicitly
           curl -L https://github.com/yannh/kubeconform/releases/download/v0.6.4/kubeconform-linux-amd64.tar.gz | tar xvz
           sudo mv kubeconform /usr/local/bin/
           chmod +x /usr/local/bin/kubeconform
 
-      - name: Validate Production Cluster
+      - name: Validate Bootstrap Manifests
         run: |
-          # Build the full manifest set using Kustomize
-          kustomize build clusters/production/bootstrap > full-cluster.yaml
+          echo "Validating Bootstrap (Plain YAML)..."
+          # Validate the raw App of Apps manifest
+          cat clusters/production/bootstrap/*.yaml | kubeconform \
+            -summary \
+            -ignore-missing-schemas \
+            -verbose \
+            -skip Application
+
+      - name: Validate Cluster State (Kustomize)
+        run: |
+          echo "Validating Production Cluster (Kustomize)..."
+          # Build the 'sets' directory which acts as the root Kustomization
+          kustomize build clusters/production/sets > full-cluster.yaml
           
-          # Validate the output against Kubernetes schemas and ignore crds
+          # Validate the output
           cat full-cluster.yaml | kubeconform \
             -summary \
             -ignore-missing-schemas \

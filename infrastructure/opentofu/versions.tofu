@@ -34,6 +34,6 @@ provider "proxmox" {
   ssh {
     agent       = false
     username    = var.proxmox.username
-    private_key = file("~/.ssh/proxmox")
+    private_key = file(var.proxmox_ssh_key_path)
   }
 }
