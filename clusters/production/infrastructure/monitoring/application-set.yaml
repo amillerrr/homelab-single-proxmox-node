@@ -20,6 +20,11 @@ spec:
             namespace: monitoring
             wave: "1"
 
+          - name: grafana
+            path: infrastructure/monitoring/grafana
+            namespace: monitoring
+            wave: "2"
+
   template:
     metadata:
       name: '{{.name}}'
