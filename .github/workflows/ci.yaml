@@ -1,0 +1,100 @@
+name: Homelab CI
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+  pull_request:
+    branches: [ "main" ]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+
+jobs:
+  # 1. Infrastructure Validation
+  tofu-validate:
+    name: OpenTofu Validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./infrastructure/opentofu
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.10.7 # Match local version
+
+      - name: OpenTofu Format Check
+        run: tofu fmt -check -recursive
+        continue-on-error: false
+
+      - name: OpenTofu Init
+        id: init
+        # Use -backend=false since runners can't access your S3 state
+        run: tofu init -backend=false
+
+      - name: OpenTofu Validate
+        id: validate
+        run: tofu validate -no-color
+
+  # 2. Kubernetes Manifest Validation (Kustomize + Kubeconform)
+  k8s-validate:
+    name: K8s Manifest Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Kustomize
+        uses: fluxcd/pkg/actions/kustomize@main
+
+      - name: Setup Kubeconform
+        # Kubeconform validates resources against the official K8s schema
+        uses: yannh/kubeconform-action@v1
+        with:
+          kubernetes_version: "1.34.0" # Match cluster version
+          strict: true
+          ignore_missing_schemas: true
+
+      - name: Validate Production Cluster
+        run: |
+          # Build the full manifest set using Kustomize
+          kustomize build clusters/production/bootstrap > full-cluster.yaml
+          
+          # Validate the output against Kubernetes schemas and ignore crds
+          cat full-cluster.yaml | kubeconform \
+            -summary \
+            -ignore-missing-schemas \
+            -verbose \
+            -skip CustomResourceDefinition,AppProject,Application,ApplicationSet,SealedSecret,Certificate,ClusterIssuer,Gateway,HTTPRoute,CiliumLoadBalancerIPPool
+
+  # 3. Script Linting (Shellcheck)
+  script-lint:
+    name: Bash Script Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: '.'
+          ignore_names: 'nodes' # Ignore files without extension
+
+  # 4. Security Scanning (Trivy)
+  security-scan:
+    name: Security & Secret Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'table'
+          exit-code: '1'
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
